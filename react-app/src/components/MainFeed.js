@@ -17,128 +17,132 @@ import channel6 from "../channel-pics/channel-6.jpeg";
 
 const MainFeed = () => {
   return (
-    <div class="video-grid">
-      <div class="preview">
-        <div class="thumbnail-row">
-          <img class="thumbnail" src={thumbnail1} />
+    <div className="video-grid px-4">
+      <div className="preview">
+        <div className="thumbnail-row">
+          <img className="thumbnail" src={thumbnail1} alt="thumbnail" />
         </div>
 
-        <div class="video-info-grid">
-          <div class="channel-pic">
-            <img class="profile-pic" src={channel1} />
+        <div className="video-info-grid">
+          <div className="channel-pic">
+            <img className="profile-pic" src={channel1} alt="channel" />
           </div>
 
-          <div class="video-info">
-            <p class="title">
+          <div className="video-info">
+            <p className="title">
               Talking Tech and AI with Google CEO Sundar Pichai!
             </p>
 
-            <p class="author">Marques Brownlee</p>
+            <p className="author">Marques Brownlee</p>
 
-            <p class="stats">3.4M views &middot; 6 months ago</p>
+            <p className="stats">3.4M views &middot; 6 months ago</p>
           </div>
         </div>
       </div>
 
-      <div class="preview">
-        <div class="thumbnail-row">
-          <img class="thumbnail" src={thumbnail2} />
+      <div className="preview">
+        <div className="thumbnail-row">
+          <img className="thumbnail" src={thumbnail2} alt="thumbnail" />
         </div>
 
-        <div class="video-info-grid">
-          <div class="channel-pic">
-            <img class="profile-pic" src={channel2} />
+        <div className="video-info-grid">
+          <div className="channel-pic">
+            <img className="profile-pic" src={channel2} alt="channel" />
           </div>
 
-          <div class="video-info">
-            <p class="title">Try Not To Laugh Challenge #9</p>
+          <div className="video-info">
+            <p className="title">Try Not To Laugh Challenge #9</p>
 
-            <p class="author">Markiplier</p>
+            <p className="author">Markiplier</p>
 
-            <p class="stats">19M views &middot; 4 years ago</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="preview">
-        <div class="thumbnail-row">
-          <img class="thumbnail" src={thumbnail3} />
-        </div>
-
-        <div class="video-info-grid">
-          <div class="channel-pic">
-            <img class="profile-pic" src={channel3} />
-          </div>
-
-          <div class="video-info">
-            <p class="title">Crazy Tik Toks Taken Moments Before DISASTER</p>
-
-            <p class="author">SSSniperWolf</p>
-
-            <p class="stats">12M views &middot; 1 year ago</p>
+            <p className="stats">19M views &middot; 4 years ago</p>
           </div>
         </div>
       </div>
 
-      <div class="preview">
-        <div class="thumbnail-row">
-          <img class="thumbnail" src={thumbnail4} />
+      <div className="preview">
+        <div className="thumbnail-row">
+          <img className="thumbnail" src={thumbnail3} alt="thumbnail" />
         </div>
 
-        <div class="video-info-grid">
-          <div class="channel-pic">
-            <img class="profile-pic" src={channel4} />
+        <div className="video-info-grid">
+          <div className="channel-pic">
+            <img className="profile-pic" src={channel3} alt="channel" />
           </div>
 
-          <div class="video-info">
-            <p class="title">
+          <div className="video-info">
+            <p className="title">
+              Crazy Tik Toks Taken Moments Before DISASTER
+            </p>
+
+            <p className="author">SSSniperWolf</p>
+
+            <p className="stats">12M views &middot; 1 year ago</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="preview">
+        <div className="thumbnail-row">
+          <img className="thumbnail" src={thumbnail4} alt="thumbnail" />
+        </div>
+
+        <div className="video-info-grid">
+          <div className="channel-pic">
+            <img className="profile-pic" src={channel4} alt="channel" />
+          </div>
+
+          <div className="video-info">
+            <p className="title">
               The Simplest Math Problem No One Can Solve - Collatz Conjecture
             </p>
 
-            <p class="author">Veritasium</p>
+            <p className="author">Veritasium</p>
 
-            <p class="stats">18M views &middot; 4 months ago</p>
+            <p className="stats">18M views &middot; 4 months ago</p>
           </div>
         </div>
       </div>
-      <div class="preview">
-        <div class="thumbnail-row">
-          <img class="thumbnail" src={thumbnail5} />
+      <div className="preview">
+        <div className="thumbnail-row">
+          <img className="thumbnail" src={thumbnail5} alt="thumbnail" />
         </div>
 
-        <div class="video-info-grid">
-          <div class="channel-pic">
-            <img class="profile-pic" src={channel5} />
+        <div className="video-info-grid">
+          <div className="channel-pic">
+            <img className="profile-pic" src={channel5} alt="channel" />
           </div>
 
-          <div class="video-info">
-            <p class="title">
+          <div className="video-info">
+            <p className="title">
               Kadane's Algorithm to Maximum Sum Subarray Problem
             </p>
 
-            <p class="author">CS Dojo</p>
+            <p className="author">CS Dojo</p>
 
-            <p class="stats">519K views &middot; 5 years ago</p>
+            <p className="stats">519K views &middot; 5 years ago</p>
           </div>
         </div>
       </div>
 
-      <div class="preview">
-        <div class="thumbnail-row">
-          <img class="thumbnail" src={thumbnail6} />
+      <div className="preview">
+        <div className="thumbnail-row">
+          <img className="thumbnail" src={thumbnail6} alt="thumbnail" />
         </div>
 
-        <div class="video-info-grid">
-          <div class="channel-pic">
-            <img class="profile-pic" src={channel6} />
+        <div className="video-info-grid">
+          <div className="channel-pic">
+            <img className="profile-pic" src={channel6} alt="channel" />
           </div>
 
-          <div class="video-info">
-            <p class="title">Anything You Can Fit In The Circle I'll Pay For</p>
+          <div className="video-info">
+            <p className="title">
+              Anything You Can Fit In The Circle I'll Pay For
+            </p>
 
-            <p class="author">MrBeast</p>
+            <p className="author">MrBeast</p>
 
-            <p class="stats">141M views &middot; 1 year ago</p>
+            <p className="stats">141M views &middot; 1 year ago</p>
           </div>
         </div>
       </div>
