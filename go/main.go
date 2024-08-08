@@ -45,7 +45,7 @@ func main() {
 	// returns pointer (*queries) to command-line args
 	queries := flag.String("queries", "", "Comma seperated list of query strings for factchecktools API")
 	// Parse arguments
-	flag.Parse() // "query1","query2","query3"
+	flag.Parse() // ["query1","query2","query3"]
 
 	// Dereference pointer for string value, err handle if empty
 	if *queries == "" {
