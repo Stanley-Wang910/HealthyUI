@@ -1,0 +1,76 @@
+{
+  "root": true,
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "env": {
+    "browser": true,
+    "es2020": true,
+    "amd": true,
+    "node": true
+  },
+  "parser": "@typescript-eslint/parser",
+  "settings": {
+    "react": {
+      "version": "detect"
+    },
+    "import/resolver": {
+      "node": {
+        "paths": ["src"],
+        "extensions": [".js", ".jsx", ".ts", ".tsx"]
+      }
+    }
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:prettier/recommended"
+  ],
+  "globals": {
+    "$": true,
+    "COURSEFLOW_APP": true,
+    "JSX": true,
+    "makeActiveSidebar": true
+  },
+  "plugins": ["react", "prettier", "@typescript-eslint", "react-hooks"],
+  "rules": {
+    "no-var": "warn",
+    "no-undef": "warn",
+    "no-prototype-builtins": "warn",
+    "no-useless-escape": "warn",
+    "no-redeclare": "warn",
+    "no-empty": "warn",
+    "react/jsx-key": "warn",
+    "react/display-name": "off",
+    "react/no-unknown-property": "warn",
+    "react/jsx-no-undef": "warn",
+    "react/react-in-jsx-scope": "off",
+    "react/prop-types": "off",
+    "no-case-declarations": "warn",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/ban-ts-comment": "warn",
+    "@typescript-eslint/no-unused-vars": "off",
+    "@typescript-eslint/no-this-alias": "off",
+    "prefer-const": "warn",
+    "react/no-unescaped-entities": "off",
+    "react/jsx-filename-extension": [
+      1,
+      {
+        "extensions": [".js", ".jsx", ".tsx"]
+      }
+    ],
+    "prettier/prettier": [
+      "warn",
+      {},
+      {
+        "usePrettierrc": true
+      }
+    ]
+  }
+}

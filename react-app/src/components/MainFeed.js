@@ -1,19 +1,19 @@
-import React from "react";
-import "../styles/MainFeed.css";
+import React from 'react'
+import '../styles/MainFeed.css'
 
-import thumbnail1 from "../thumbnails/thumbnail-1.webp";
-import thumbnail2 from "../thumbnails/thumbnail-2.webp";
-import thumbnail3 from "../thumbnails/thumbnail-3.webp";
-import thumbnail4 from "../thumbnails/thumbnail-4.webp";
-import thumbnail5 from "../thumbnails/thumbnail-5.webp";
-import thumbnail6 from "../thumbnails/thumbnail-6.webp";
+import thumbnail1 from '../thumbnails/thumbnail-1.webp'
+import thumbnail2 from '../thumbnails/thumbnail-2.webp'
+import thumbnail3 from '../thumbnails/thumbnail-3.webp'
+import thumbnail4 from '../thumbnails/thumbnail-4.webp'
+import thumbnail5 from '../thumbnails/thumbnail-5.webp'
+import thumbnail6 from '../thumbnails/thumbnail-6.webp'
 
-import channel1 from "../channel-pics/channel-1.jpeg";
-import channel2 from "../channel-pics/channel-2.jpeg";
-import channel3 from "../channel-pics/channel-3.jpeg";
-import channel4 from "../channel-pics/channel-4.jpeg";
-import channel5 from "../channel-pics/channel-5.jpeg";
-import channel6 from "../channel-pics/channel-6.jpeg";
+import channel1 from '../channel-pics/channel-1.jpeg'
+import channel2 from '../channel-pics/channel-2.jpeg'
+import channel3 from '../channel-pics/channel-3.jpeg'
+import channel4 from '../channel-pics/channel-4.jpeg'
+import channel5 from '../channel-pics/channel-5.jpeg'
+import channel6 from '../channel-pics/channel-6.jpeg'
 
 const MainFeed = () => {
   return (
@@ -147,7 +147,7 @@ const MainFeed = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default MainFeed;
+export default MainFeed

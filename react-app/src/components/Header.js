@@ -37,7 +37,11 @@ const Header = () => {
         <img className="apps-icon" src={youtubeApps} alt="Apps" />
         <img className="notif-icon" src={notifications} alt="Notifications" />
         <img
-          className="curr-user-pic"
+          className=
+          "curr-user-pic"
+          
+          
+          
           src="channel-pics/my-channel.HEIC"
           alt="User"
         />
