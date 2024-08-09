@@ -19,11 +19,11 @@ def test():
 @app.route('/factcheck')
 def run_factcheck_go():
     try:
-        formatted_arg = ['-queries', 'JD Vance Couch,Kamala Harris Rich']
-        result = subprocess.run(['./main.exe'] + formatted_arg, capture_output=True, text=True, encoding='utf-8')
+        formatted_arg = ['-queries', 'Global Warming']
+        result = subprocess.run(['./go/main.exe'] + formatted_arg, capture_output=True, text=True, encoding='utf-8')
 
         print(result.stdout)
-        
+
         if result.returncode == 0:
             return jsonify(json.loads(result.stdout))
         else:

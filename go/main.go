@@ -11,6 +11,7 @@ import (
 	"sync"
 
 	"github.com/joho/godotenv"
+	// "golang.org/x/oauth2"
 	factchecktools "google.golang.org/api/factchecktools/v1alpha1"
 	"google.golang.org/api/option"
 )
@@ -39,6 +40,7 @@ type FactCheckResult struct {
 func main() {
 	errEnv := godotenv.Load()
 	if errEnv != nil {
+		// Located root dir
 		log.Fatalf("Error loading .env file: %v", errEnv)
 	}
 
@@ -65,16 +67,57 @@ func main() {
 	}
 }
 
+// func getOAuthClient(ctx context.Context) (*oauth2.Token, error) {
+
+// 	ClientID := os.Getenv("CLIENT_ID")
+// 	ClientSecret := os.Getenv("CLIENT_SECRET")
+
+// 	conf := &oauth2.Config{
+// 		ClientID:     ClientID,
+// 		ClientSecret: ClientSecret,
+// 		RedirectURL:  "localhost:5000/test", // Fix later
+// 		Scopes:       []string{"https://www.googleapis.com/auth/factchecktools"},
+// 		Endpoint: oauth2.Endpoint{
+// 			AuthURL:  "https://accounts.google.com/o/oauth2/auth",
+// 			TokenURL: "https://accounts.google.com/o/oauth2/token",
+// 		},
+// 	}
+
+// 	verifier := oauth2.GenerateVerifier()
+
+// 	url := conf.AuthCodeURL("state", oauth2.AccessTypeOffline, oauth2.S256ChallengeOption(verifier))
+// 	fmt.Printf("Visit the URL for auth dialog: %v", url)
+
+// 	var code string
+// 	if _, err := fmt.Scan(&code); err != nil {
+// 		return nil, fmt.Errorf("failed to read code: %v", err)
+// 	}
+// 	tok, err := conf.Exchange(ctx, code, oauth2.VerifierOption(verifier))
+// 	if err != nil {
+// 		return nil, fmt.Errorf("failed to retrieve token: %v", err)
+// 	}
+
+// 	return tok, nil
+// }
+
 // Return struct FactCheckResult obj and error value
 func factCheckGET(query string) (FactCheckResult, error) {
 	// Service setup
 	// Load env
 	ctx := context.Background()
+
+	// tok, err := getOAuthClient(ctx)
+	// if err != nil {
+	// 	return FactCheckResult{}, fmt.Errorf("failed to get OAuth client: %v", err)
+	// }
+
+	// svc, err := factchecktools.NewService(ctx, option.WithTokenSource(oauth2.StaticTokenSource(tok)))
+
 	googleApiKey := os.Getenv("GOOGLE_API_KEY")
 	if googleApiKey == "" {
 		return FactCheckResult{}, fmt.Errorf("GOOGLE_API_KEY not set in .env")
 	}
-	// Use Google API Key for Auth Currently
+
 	svc, err := factchecktools.NewService(ctx, option.WithAPIKey(googleApiKey))
 
 	if err != nil {
