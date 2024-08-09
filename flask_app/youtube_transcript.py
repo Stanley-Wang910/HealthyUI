@@ -1,6 +1,6 @@
 from youtube_transcript_api import YouTubeTranscriptApi
 
-vid_id = 'WuDiiHa0U-A'
+vid_id = 'JEb4H72Rt6Q'
 transcript_list = YouTubeTranscriptApi.list_transcripts(vid_id)
 
 try:
