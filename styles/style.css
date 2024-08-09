@@ -1,0 +1,10 @@
+h2,
+p {
+    color: rgb(40, 107, 231);
+    text-align: center;
+  }
+
+  iframe {
+    display: block;
+    margin: 30px auto 30px;
+  }
