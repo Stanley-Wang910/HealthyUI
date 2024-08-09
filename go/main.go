@@ -1,8 +1,11 @@
 package main
 
 import (
+	// "flag"
 	"flag"
+	"fmt"
 	"log"
+
 	"strings"
 
 	"github.com/joho/godotenv"
@@ -10,33 +13,62 @@ import (
 )
 
 func main() {
+	// Load needed before any function can get variables
 	errEnv := godotenv.Load()
 	if errEnv != nil {
-		// Located root dir
 		log.Fatalf("Error loading .env file: %v", errEnv)
 	}
 
-	// returns pointer (*queries) to command-line args
-	queries := flag.String("queries", "", "Comma seperated list of query strings for factchecktools API")
-	// Parse arguments
-	flag.Parse() // ["query1","query2","query3"]
+	command := flag.String("command", "", "Command to run: factcheck, news, or youtube")
+	flag.StringVar(command, "c", "", "Command to run: factcheck, news, or youtube")
 
-	// Dereference pointer for string value, err handle if empty
-	if *queries == "" {
-		log.Fatalln("At least one query string is required")
-	}
+	queries := flag.String("q", "", "Comma seperated list of query strings for factchecktools API")
 
-	// Tokenize args by "," into []string (dynamically typed, size not defined at compile time)
-	queryList := strings.Split(*queries, ",")
+	// newsCmd := flag.NewFlagSet("news", flag.ExitOnError)
 
-	// for i, q := range queryList {
-	// 	fmt.Printf("query is %d, %s\n", i, q)
+	// youtubeCmd := flag.NewFlagSet("youtube", flag.ExitOnError)
+
+	// check CLI arg
+	// if len(flag.Args()) < 1 {
+	// 	fmt.Println("Expected 'factcheck', 'news' or 'youtube' subcommands")
+	// 	return
 	// }
+	flag.Parse()
 
-	err := factCheckGETConcurrent(queryList)
-	if err != nil {
-		log.Fatalln("Error in factCheckGETConcurrent:", err)
+	if *command == "" {
+		fmt.Println("Please provide a command: -c=factcheck, -c=news, or -c=youtube")
+		return
 	}
+
+	// factcheck
+	switch *command {
+	case "factcheck":
+		if *queries == "" {
+			log.Fatalln("At least one query string for factcheck is required")
+		}
+
+		// Tokenize args by "," into []string (dynamically typed, size not defined at compile time)
+		queryList := strings.Split(*queries, ",")
+
+		err := factCheckGETConcurrent(queryList)
+		if err != nil {
+			log.Fatalln("Error in factCheckGETConcurrent:", err)
+		}
+
+	case "news":
+		// newsCmd.Parse(flag.Args())
+		err := newsApiGETEverything()
+		if err != nil {
+			log.Fatalln("Error in newsAPI:", err)
+		}
+
+	case "youtube":
+		youtube()
+
+	default:
+		fmt.Println("Expected '-c=factcheck', '-c=news', or '-c=youtube'")
+	}
+
 }
 
 // func getOAuthClient(ctx context.Context) (*oauth2.Token, error) {

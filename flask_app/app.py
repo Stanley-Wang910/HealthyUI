@@ -19,13 +19,19 @@ def test():
 @app.route('/factcheck')
 def run_factcheck_go():
     try:
-        formatted_arg = ['-queries', 'Global Warming']
-        result = subprocess.run(['./go/main.exe'] + formatted_arg, capture_output=True, text=True, encoding='utf-8')
+        run = 'youtube'
+        command = ['-c', run] 
+        # sub_command = ['-q', 'JD Vance Couch']
+        sub_command = []
 
-        print(result.stdout)
+        result = subprocess.run(['./go/go.exe'] + command + (sub_command if sub_command is not None else ''), capture_output=True, text=True, encoding='utf-8')
+        # result = subprocess.run(['./go/main.exe'], capture_output=True, text=True, encoding='utf-8')
+
+        # print(result.stdout)
 
         if result.returncode == 0:
             return jsonify(json.loads(result.stdout))
+            # return jsonify(result.stdout)
         else:
             return jsonify({'error': result.stderr}), 500
     except Exception as e:
