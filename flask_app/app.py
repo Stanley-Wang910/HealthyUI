@@ -8,6 +8,8 @@ app = Flask(__name__)
 
 CORS(app, supports_credentials=True, origins=['http://localhost:3000'])
 
+# Comment
+
 
 @app.route('/api/test', methods=['GET']) 
 
