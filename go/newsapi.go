@@ -9,6 +9,7 @@ import (
 )
 
 type NewsAPIResponse struct {
+	Query        string `json:"query"`
 	Status       string `json:"status"`
 	TotalResults int    `json:"totalResults"`
 	Articles     []struct {
@@ -20,9 +21,9 @@ type NewsAPIResponse struct {
 		Title       string `json:"title"`
 		Description string `json:"description"`
 		URL         string `json:"url"`
-		URLToImage  string `json:"urlToImage"`
+		// URLToImage  string `json:"urlToImage"`
 		PublishedAt string `json:"publishedAt"`
-		// Content     string `json:"content"`
+		Content     string `json:"content"`
 	} `json:"articles"`
 }
 
@@ -34,7 +35,7 @@ func auth() (string, error) {
 	return newsApiKey, nil
 }
 
-func newsApiGETEverything() error {
+func newsApiGET() error {
 
 	newsApiKey, err := auth()
 	if err != nil {
@@ -48,10 +49,23 @@ func newsApiGETEverything() error {
 	q := req.URL.Query()
 
 	// Add query parameters here or pass them in
-	q.Add("q", "bitcoin")
-	q.Add("pageSize", "5")
+	q.Add("q", "Ukraine Attack Russia")
+	q.Add("pageSize", "2")
+	q.Add("language", "en")
+	q.Add("sortBy", "relevancy")
+	// searchIn : title, description, content default is all
+	// sources : comma separated string (max 20)
+	// domains : comma separated string
+	// excludeDomains : comma separated string
+	// from : date in ISO 8601 format e.g. 2024-08-09 or 2024-08-09T17:30:00
+	// to : date in ISO 8601 format e.g. 2024-08-09 or 2024-08-09T17:30:00
+	// language: en
+	// sortBy: relevancy, popularity, publishedAt
+	// pageSize: integer
+	// page: integer
 
 	req.URL.RawQuery = q.Encode()
+	fullURL := req.URL.String()
 
 	req.Header.Set("Authorization", newsApiKey)
 	req.Header.Set("Accept", "application/json")
@@ -75,6 +89,7 @@ func newsApiGETEverything() error {
 
 	// assign struct obj for GET response
 	var newsResponse NewsAPIResponse
+	newsResponse.Query = fullURL
 
 	// Attempt deserialization (convert JSON to struct)
 	// Looks through fields in struct obj, tries to find matching JSON string/int
@@ -93,3 +108,5 @@ func newsApiGETEverything() error {
 
 	return nil
 }
+
+// func newsApiGETConcurrent(queries []string) error {

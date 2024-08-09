@@ -57,7 +57,7 @@ func main() {
 
 	case "news":
 		// newsCmd.Parse(flag.Args())
-		err := newsApiGETEverything()
+		err := newsApiGET()
 		if err != nil {
 			log.Fatalln("Error in newsAPI:", err)
 		}
