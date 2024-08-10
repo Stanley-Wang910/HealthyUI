@@ -38,6 +38,11 @@ def run_factcheck_go():
         return jsonify({'error': str(e)}), 500
 
 
+@app.route('/api/test', methods=['GET']) 
+
+@app.route('/test')
+def test():
+    return jsonify({'message': 'Hello World!'})
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
