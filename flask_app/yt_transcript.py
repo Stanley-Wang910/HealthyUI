@@ -2,6 +2,8 @@ import http.client
 import json
 from youtube_transcript_api import YouTubeTranscriptApi
 
+import utils
+
 
 def get_most_replayed_sections(video_id):
     conn = http.client.HTTPSConnection("yt.lemnoslife.com")
@@ -109,14 +111,18 @@ def sort_entries(entries, timestamps, option="asc"):
 
     return relevant_transcript
 
+def get_relevant_transcript(video_id, option="asc"):
 
-video_id = '1KsghMTtgig'
+    with utils.track_memory_usage("get_most_replayed_sections"):
+        res = get_most_replayed_sections(video_id)
 
-res = get_most_replayed_sections(video_id)
-timestamps = get_peak_rewatched_timestamps(res)
-print(timestamps)
-transcript = get_transcript(video_id)
-entries = find_close_entries(timestamps, transcript) # Default returns ascending
-relevant_transcript = sort_entries(entries, timestamps)
-print(relevant_transcript)
+    timestamps = get_peak_rewatched_timestamps(res)
+    print(timestamps)
 
+    with utils.track_memory_usage("get_transcript"):
+        transcript = get_transcript(video_id)
+    
+    entries = find_close_entries(timestamps, transcript) # Default returns ascending
+
+    relevant_transcript = sort_entries(entries, timestamps)
+    print(relevant_transcript)

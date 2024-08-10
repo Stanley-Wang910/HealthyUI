@@ -140,13 +140,13 @@ func factCheckGETConcurrent(queries []string) error {
 	}()
 
 	// Map of results including successful API Calls and error strings
-	allResults := make(map[string]interface{})
+	allResults := make(map[string]FactCheckResult) // All values in this map must be of type FactCheckResult
 
 	// Processing of results channel starts immediately after starting go routines
 	// Runs alongside API calls, until wg == 0 and channel closes
 	for res := range results { // Passing struct values sent to results channel
 		if res.err != nil {
-			allResults[res.query] = fmt.Sprintf("Error: %v", res.err) // Sprintf to return error string
+			fmt.Printf("Error for one query: %s : %v\n", res.query, res.err)
 		} else {
 			allResults[res.query] = res.result
 		}
