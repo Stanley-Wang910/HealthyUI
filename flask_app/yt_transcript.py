@@ -33,24 +33,26 @@ def get_peak_rewatched_timestamps(result_json):
 
 def get_transcript(video_id):
     transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
-
     try:
         transcript_manual = transcript_list.find_manually_created_transcript(['en'])  
         if transcript_manual is not None:
-            print(transcript_manual.fetch())
-            print(transcript_manual.translate('en').fetch())
+            print("manual transcript found")
+            # print(transcript_manual.fetch())
+            # print(transcript_manual.translate('en').fetch())
+            return (transcript_manual.fetch()) # with timestamps
 
     except Exception as e:
         print("No manual transcript found")
 
-    try:
-        transcript_auto = transcript_list.find_generated_transcript(['en'])
-        if transcript_auto is not None:
-            return (transcript_auto.fetch()) # with timestamps
-            # print(transcript_auto.translate('en').fetch()) # without timestamps
+        try:
+            transcript_auto = transcript_list.find_generated_transcript(['en'])
+            if transcript_auto is not None:
+                print("auto transcript found")
+                return (transcript_auto.fetch()) # with timestamps
+                # print(transcript_auto.translate('en').fetch()) # without timestamps
 
-    except Exception as e:
-        print("No auto transcript found")
+        except Exception as e:
+            print("No auto transcript found")
 
 
 def find_close_entries(timestamps, transcript, tolerance_sec=20):
@@ -68,6 +70,8 @@ def find_close_entries(timestamps, transcript, tolerance_sec=20):
         # No exact match, return closest insertion point
         # Handles cases when x > all values in list
         return left if left < len(arr) else right
+
+    print(f"Processing with tolerance: {tolerance_sec}s")    
 
     result = []
     last_processed_time = float("-inf")
@@ -111,7 +115,13 @@ def sort_entries(entries, timestamps, option="asc"):
 
     return relevant_transcript
 
-def get_relevant_transcript(video_id, option="asc"):
+def get_relevant_transcript(video_id, tolerance_sec=20, option="asc"):
+
+    # Splice link
+    # https://www.youtube.com/watch?v=vo4pMVb0R6M&t=65s
+    if "/" in video_id:
+        video_id = video_id.split("?v=")[-1].split("&t=")[0] if "&t=" in video_id else video_id.split("?v=")[-1]
+        print(f"video_id: {video_id}")
 
     with utils.track_memory_usage("get_most_replayed_sections"):
         res = get_most_replayed_sections(video_id)
@@ -122,7 +132,11 @@ def get_relevant_transcript(video_id, option="asc"):
     with utils.track_memory_usage("get_transcript"):
         transcript = get_transcript(video_id)
     
-    entries = find_close_entries(timestamps, transcript) # Default returns ascending
+    entries = find_close_entries(timestamps, transcript, tolerance_sec=tolerance_sec) # Default returns ascending
 
     relevant_transcript = sort_entries(entries, timestamps)
     print(relevant_transcript)
+
+
+video_id = "vo4pMVb0R6M"
+get_relevant_transcript(video_id, 10)
