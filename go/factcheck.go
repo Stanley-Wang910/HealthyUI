@@ -90,7 +90,6 @@ func factCheckGET(query string, svc *factchecktools.Service) (FactCheckResult, e
 
 // Export with capitalized name
 func factCheckGETConcurrent(queries []string) error {
-	// Load env
 	ctx := context.Background()
 
 	// tok, err := getOAuthClient(ctx)

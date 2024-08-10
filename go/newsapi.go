@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"sync"
 )
 
 type NewsAPIResponse struct {
@@ -35,24 +36,21 @@ func auth() (string, error) {
 	return newsApiKey, nil
 }
 
-func newsApiGET() error {
+func newsApiGET(query string, newsApiKey string) (NewsAPIResponse, error) {
+	// assign struct obj for GET response
+	var newsResponse NewsAPIResponse
 
-	newsApiKey, err := auth()
-	if err != nil {
-		return fmt.Errorf("error: %v", err)
-	}
 	req, err := http.NewRequest("GET", "https://newsapi.org/v2/everything", nil)
 	if err != nil {
-		return fmt.Errorf("error: %v", err)
+		return newsResponse, fmt.Errorf("error: %v", err)
 	}
 
 	q := req.URL.Query()
-
 	// Add query parameters here or pass them in
-	q.Add("q", "Ukraine Attack Russia")
-	q.Add("pageSize", "2")
+	q.Add("q", query)
+	q.Add("pageSize", "5")
 	q.Add("language", "en")
-	q.Add("sortBy", "relevancy")
+	// q.Add("sortBy", "relevancy")
 	// searchIn : title, description, content default is all
 	// sources : comma separated string (max 20)
 	// domains : comma separated string
@@ -65,18 +63,14 @@ func newsApiGET() error {
 	// page: integer
 
 	req.URL.RawQuery = q.Encode()
-	fullURL := req.URL.String()
 
 	req.Header.Set("Authorization", newsApiKey)
 	req.Header.Set("Accept", "application/json")
 
-	// params =
-	// q
-
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return fmt.Errorf("error: %v", err)
+		return newsResponse, fmt.Errorf("error: %v", err)
 
 	}
 
@@ -84,29 +78,69 @@ func newsApiGET() error {
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("error: %v", err)
+		return newsResponse, fmt.Errorf("error reading response body: %v", err)
 	}
 
-	// assign struct obj for GET response
-	var newsResponse NewsAPIResponse
-	newsResponse.Query = fullURL
+	newsResponse.Query = req.URL.String()
 
 	// Attempt deserialization (convert JSON to struct)
 	// Looks through fields in struct obj, tries to find matching JSON string/int
 	err = json.Unmarshal(body, &newsResponse) // body = []bytes, &newsResponse = pointer to struct
 	if err != nil {
-		return fmt.Errorf("error unmarshaling JSON string: %v", err)
+		return newsResponse, fmt.Errorf("error unmarshaling JSON string: %v", err)
 	}
 
-	// Return JSON Formatted output
-	jsonOutput, err := json.MarshalIndent(newsResponse, "", " ")
+	return newsResponse, nil
+}
+
+func newsApiGETConcurrent(queries []string) error {
+	newsApiKey, err := auth()
+	if err != nil {
+		return fmt.Errorf("error: %v", err)
+	}
+
+	var wg sync.WaitGroup
+
+	results := make(chan struct {
+		query  string
+		result NewsAPIResponse
+		err    error
+	}, len(queries))
+
+	for _, query := range queries {
+		wg.Add(1) // Increment counter before starting a call
+		// Start multiple go routines, each making API GET request for their query
+		go func(q string) {
+			defer wg.Done() // Decrement counter when call finishes
+			result, err := newsApiGET(q, newsApiKey)
+			results <- struct {
+				query  string
+				result NewsAPIResponse
+				err    error
+			}{q, result, err}
+		}(query) // Pass query into go func() as q
+	}
+
+	go func() {
+		wg.Wait()
+		close(results)
+	}()
+
+	allResults := make(map[string]NewsAPIResponse)
+
+	for res := range results { // Passing struct values sent to results channel
+		if res.err != nil {
+			fmt.Printf("Error for one query: %s : %v\n", res.query, res.err)
+		} else {
+			allResults[res.query] = res.result
+		}
+	}
+
+	jsonOutput, err := json.MarshalIndent(allResults, "", " ")
 	if err != nil {
 		return fmt.Errorf("error marshaling JSON: %v", err)
 	}
 
 	fmt.Println(string(jsonOutput))
-
 	return nil
 }
-
-// func newsApiGETConcurrent(queries []string) error {

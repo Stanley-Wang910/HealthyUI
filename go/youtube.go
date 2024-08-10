@@ -7,13 +7,13 @@ import (
 	"os"
 )
 
-func youtube() {
+func youtube(id string) error {
 
 	googleApiKey := os.Getenv("GOOGLE_API_KEY")
 	if googleApiKey == "" {
 		panic("GOOGLE_API_KEY not set in .env")
 	}
-	url := fmt.Sprintf("https://www.googleapis.com/youtube/v3/videos?part=topicDetails%%2Csnippet%%2Cstatistics&id=88cM3AmutRU&key=%s", googleApiKey)
+	url := fmt.Sprintf("https://www.googleapis.com/youtube/v3/videos?part=topicDetails%%2Csnippet%%2Cstatistics&id=%s&key=%s", id, googleApiKey)
 
 	req, _ := http.NewRequest("GET", url, nil)
 
@@ -22,7 +22,7 @@ func youtube() {
 	res, err := http.DefaultClient.Do(req)
 
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("Client could not get response: %v", err)
 	}
 
 	defer res.Body.Close()
@@ -30,4 +30,5 @@ func youtube() {
 
 	fmt.Println(res)
 	fmt.Println(string(body))
+	return nil
 }
