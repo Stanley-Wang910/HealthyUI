@@ -1,14 +1,13 @@
-import React from "react";
-import "../styles/Header.css";
+import React from 'react'
+import '../styles/Header.css'
 
-import hamburgerMenu from "../icons/hamburger-menu.svg";
-import youtubeLogo from "../icons/youtube-logo.svg";
-import search from "../icons/search.svg";
-import voiceSearchIcon from "../icons/voice-search-icon.svg";
-import upload from "../icons/upload.svg";
-import youtubeApps from "../icons/youtube-apps.svg";
-import notifications from "../icons/notifications.svg";
-import currUserPic from "../channel-pics/my-channel.HEIC";
+import hamburgerMenu from '../icons/hamburger-menu.svg'
+import youtubeLogo from '../icons/youtube-logo.svg'
+import search from '../icons/search.svg'
+import voiceSearchIcon from '../icons/voice-search-icon.svg'
+import upload from '../icons/upload.svg'
+import youtubeApps from '../icons/youtube-apps.svg'
+import notifications from '../icons/notifications.svg'
 
 const Header = () => {
   return (
@@ -37,17 +36,13 @@ const Header = () => {
         <img className="apps-icon" src={youtubeApps} alt="Apps" />
         <img className="notif-icon" src={notifications} alt="Notifications" />
         <img
-          className=
-          "curr-user-pic"
-          
-          
-          
+          className="curr-user-pic"
           src="channel-pics/my-channel.HEIC"
           alt="User"
         />
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Header;
+export default Header

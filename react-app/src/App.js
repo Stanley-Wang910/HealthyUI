@@ -1,11 +1,10 @@
 import React from 'react'
 import './App.css'
 
-import MainFeed from './components/MainFeed.js'
-import Header from './components/Header.js'
+import MainFeed from './components/MainFeed'
+import Header from './components/Header'
 import { useQuery } from 'react-query'
 import { fetchTestData } from './api/api-calls'
-import StyleExamples from "./components/examples/StyleExamples"
 
 function App() {
   const { data, error, isError, isLoading } = useQuery(
@@ -17,12 +16,14 @@ function App() {
     console.error('loading')
     // don't block rendering for now but use this pattern in sub components to show
     // render blocking API requests
+    return <div>'loading'</div>
   }
 
   if (isError) {
     console.error('Error fetching data', error)
     // don't block rendering for now
     // return <div>Error fetching data</div>;
+    return <div>'error'</div>
   }
 
   console.log(data)
