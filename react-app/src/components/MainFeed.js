@@ -147,6 +147,7 @@ const MainFeed = () => {
         </div>
       </div>
     </div>
+
   )
 }
 
