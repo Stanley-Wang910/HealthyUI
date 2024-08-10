@@ -12,7 +12,7 @@ def get_most_replayed_sections():
 
     payload = ""
 
-    conn.request("GET", "/videos?part=mostReplayed&id=YgKgY2pe15U", payload, headersList)
+    conn.request("GET", "/videos?part=mostReplayed&id=1KsghMTtgig", payload, headersList)
     response = conn.getresponse()
     result = response.read()
 
@@ -24,13 +24,13 @@ def get_most_replayed_sections():
 def get_peak_rewatched_timestamps(data):
     markers = data['items'][0]['mostReplayed']['markers']
     sorted_markers = sorted(markers, key=lambda x: x['intensityScoreNormalized'], reverse=True)    
-    top_markers = sorted_markers[:5]
+    top_markers = sorted_markers[:10]
     top_timestamps_seconds = [marker['startMillis'] / 1000 for marker in top_markers]
     top_timestamps_minutes = [marker['startMillis'] / 1000 / 60 for marker in top_markers]
     return top_timestamps_seconds
 
 def get_transcript():
-    vid_id = 'YgKgY2pe15U'
+    vid_id = '1KsghMTtgig'
     transcript_list = YouTubeTranscriptApi.list_transcripts(vid_id)
 
     try:
@@ -103,6 +103,10 @@ print(timsestamps)
 transcript = get_transcript()
 # print(transcript)
 entries = find_close_entries(timsestamps, transcript)
-for entry in entries:
-    print(f"Entry: {entry['text']}, start: {entry['start']}, close values: {entry['close_values']}")
 
+relevant_transcript = ''
+for entry in entries:
+    # print(f"Entry: {entry['text']}, start: {entry['start']}, close values: {entry['close_values']}")
+    relevant_transcript += entry['text']
+
+print(relevant_transcript)
