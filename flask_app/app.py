@@ -12,6 +12,10 @@ CORS(app, supports_credentials=True, origins=['http://localhost:3000'])
 
 # @app.route('/api/test', methods=['GET']) 
 
+@app.route('/video/get-playlist')
+def get_user_videos_playlist(user):
+    return jsonify({'message': 'Hello World!'})
+
 @app.route('/test')
 def test():
     return jsonify({'message': 'Hello World!'})
@@ -38,11 +42,11 @@ def run_factcheck_go():
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/api/test', methods=['GET']) 
-
-@app.route('/test')
-def test():
-    return jsonify({'message': 'Hello World!'})
+# @app.route('/api/test', methods=['GET'])
+#
+# @app.route('/test')
+# def test():
+#     return jsonify({'message': 'Hello World!'})
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
