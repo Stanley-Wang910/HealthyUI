@@ -3,7 +3,7 @@ import json
 from youtube_transcript_api import YouTubeTranscriptApi
 
 
-def get_most_replayed_sections():
+def get_most_replayed_sections(video_id):
     conn = http.client.HTTPSConnection("yt.lemnoslife.com")
 
     headersList = {
@@ -12,7 +12,7 @@ def get_most_replayed_sections():
 
     payload = ""
 
-    conn.request("GET", "/videos?part=mostReplayed&id=1KsghMTtgig", payload, headersList)
+    conn.request("GET", f"/videos?part=mostReplayed&id={video_id}", payload, headersList)
     response = conn.getresponse()
     result = response.read()
 
@@ -21,17 +21,16 @@ def get_most_replayed_sections():
 
     return result_json
 
-def get_peak_rewatched_timestamps(data):
-    markers = data['items'][0]['mostReplayed']['markers']
+def get_peak_rewatched_timestamps(result_json):
+    markers = result_json['items'][0]['mostReplayed']['markers']
     sorted_markers = sorted(markers, key=lambda x: x['intensityScoreNormalized'], reverse=True)    
     top_markers = sorted_markers[:10]
     top_timestamps_seconds = [marker['startMillis'] / 1000 for marker in top_markers]
-    top_timestamps_minutes = [marker['startMillis'] / 1000 / 60 for marker in top_markers]
+    # top_timestamps_minutes = [marker['startMillis'] / 1000 / 60 for marker in top_markers]
     return top_timestamps_seconds
 
-def get_transcript():
-    vid_id = '1KsghMTtgig'
-    transcript_list = YouTubeTranscriptApi.list_transcripts(vid_id)
+def get_transcript(video_id):
+    transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
 
     try:
         transcript_manual = transcript_list.find_manually_created_transcript(['en'])  
@@ -70,6 +69,8 @@ def find_close_entries(timestamps, transcript, tolerance_sec=20):
 
     result = []
     last_processed_time = float("-inf")
+    timestamp_order = {t: i for i, t in enumerate(timestamps)}
+
     for timestamp in sorted(timestamps):
         print(f"\nProcessing timestamp: {timestamp}")
         
@@ -88,7 +89,7 @@ def find_close_entries(timestamps, transcript, tolerance_sec=20):
         # Walk entries after closest match
         while i < len(transcript) and transcript[i]['start'] <= timestamp + tolerance_sec:
             entry = transcript[i]
-            result.append({**entry, "close_values" : [timestamp]})
+            result.append({**entry, "close_values" : [timestamp], "sort_key" : timestamp_order[timestamp]})
             i += 1
         
         last_processed_time = timestamp + tolerance_sec
@@ -96,17 +97,26 @@ def find_close_entries(timestamps, transcript, tolerance_sec=20):
 
     return result
 
-res = get_most_replayed_sections()
+def sort_entries(entries, timestamps, option="asc"):
+    if option == "pop": 
+        entries = sorted(entries, key=lambda x: x['sort_key']) 
 
-timsestamps = get_peak_rewatched_timestamps(res)
-print(timsestamps)
-transcript = get_transcript()
-# print(transcript)
-entries = find_close_entries(timsestamps, transcript)
+    relevant_transcript = ''
+    for entry in entries:
+        # reorder to match close_values to order of timestamps
+        print(f"Entry: {entry['text']}, start: {entry['start']}, close values: {entry['close_values']}")
+        relevant_transcript += (" " + entry['text'])
 
-relevant_transcript = ''
-for entry in entries:
-    # print(f"Entry: {entry['text']}, start: {entry['start']}, close values: {entry['close_values']}")
-    relevant_transcript += entry['text']
+    return relevant_transcript
 
+
+video_id = '1KsghMTtgig'
+
+res = get_most_replayed_sections(video_id)
+timestamps = get_peak_rewatched_timestamps(res)
+print(timestamps)
+transcript = get_transcript(video_id)
+entries = find_close_entries(timestamps, transcript) # Default returns ascending
+relevant_transcript = sort_entries(entries, timestamps)
 print(relevant_transcript)
+
