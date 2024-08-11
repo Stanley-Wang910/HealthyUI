@@ -24,6 +24,9 @@ const calcTreesToDisplay = (totalTime: number) => {
 }
 
 const Co2CounterWidget = () => {
+  /*******************************************************
+   * HOOKS
+   *******************************************************/
   const [numberTrees, setNumberTrees] = useState(100) // This number will be updated somehow
 
   const [value, setValue] = useLocalStorageObserver<string>(
@@ -44,11 +47,11 @@ const Co2CounterWidget = () => {
     return () => clearInterval(interval)
   }, [])
 
+  /*******************************************************
+   * RENDER
+   *******************************************************/
   const fullTrees = Math.floor(numberTrees)
   const partialTreeVisibility = numberTrees % 1
-
-  console.log('partialTreeVisibility')
-  console.log(partialTreeVisibility)
 
   return (
     <>

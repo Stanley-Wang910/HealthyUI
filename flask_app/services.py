@@ -1,3 +1,22 @@
+from typing import List, TypedDict
+
+
+class VideoMeta(TypedDict):
+    spectrum_calc: float
+    placeholder: str
+
+
+
+class VideoInfo(TypedDict):
+    id: str
+    title: str
+    thumbnail: str
+    channel_thumbnail: str
+    author: str
+    views: str
+    date: str
+    meta: VideoMeta
+
 
 def get_user_videos_playlist_service():
     return [
@@ -8,7 +27,11 @@ def get_user_videos_playlist_service():
             'channel-thumbnail': '/assets/images/channel-pics/channel-1.jpeg',
             'author': 'Marques Brownlee',
             'views': '3.4M views',
-            'date': '6 months ago'
+            'date': '6 months ago',
+            'meta': {
+                'spectrum_calc': 0.1,
+                'placeholder': "placeholder metadata decorator"
+            }
         },
         {
             'id': 'aAbjtW7ZtmU',
@@ -17,7 +40,12 @@ def get_user_videos_playlist_service():
             'channel-thumbnail': '/assets/images/channel-pics/channel-6.jpeg',
             'author': 'Marques Brownlee',
             'views': '3.4M views',
-            'date': '6 months ago'
+            'date': '6 months ago',
+            'meta': {
+                'spectrum_calc': 0.7,
+                'placeholder': "placeholder metadata decorator"
+
+            }
         },
         {
             'id': 'F05wh5lQr68',
@@ -26,7 +54,12 @@ def get_user_videos_playlist_service():
             'channel-thumbnail': '/assets/images/channel-pics/channel-5.jpeg',
             'author': 'Marques Brownlee',
             'views': '3.4M views',
-            'date': '6 months ago'
+            'date': '6 months ago',
+            'meta': {
+                'spectrum_calc': 0.7,
+                'placeholder': "placeholder metadata decorator"
+
+            }
         },
         {
             'id': 'Fuj4vNFREzg',
@@ -35,7 +68,12 @@ def get_user_videos_playlist_service():
             'channel-thumbnail': '/assets/images/channel-pics/channel-4.jpeg',
             'author': 'Marques Brownlee',
             'views': '3.4M views',
-            'date': '6 months ago'
+            'date': '6 months ago',
+            'meta': {
+                'spectrum_calc': 0.7,
+                'placeholder': "placeholder metadata decorator"
+
+            }
         },
         {
             'id': 'HjPEr3kw1Yw',
@@ -44,7 +82,12 @@ def get_user_videos_playlist_service():
             'channel-thumbnail': '/assets/images/channel-pics/channel-3.jpeg',
             'author': 'Marques Brownlee',
             'views': '3.4M views',
-            'date': '6 months ago'
+            'date': '6 months ago',
+            'meta': {
+                'spectrum_calc': 0.2,
+                'placeholder': "placeholder metadata decorator"
+
+            }
         },
         {
             'id': '0w3NtkYRtDM',
@@ -53,6 +96,11 @@ def get_user_videos_playlist_service():
             'channel-thumbnail': '/assets/images/channel-pics/channel-2.jpeg',
             'author': 'Marques Brownlee',
             'views': '3.4M views',
-            'date': '6 months ago'
+            'date': '6 months ago',
+            'meta': {
+                'spectrum_calc': 0.6,
+                'placeholder': "placeholder metadata decorator"
+
+            }
         },
     ]

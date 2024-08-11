@@ -5,7 +5,7 @@ import MainFeed from './components/MainFeed'
 import Header from './components/Header'
 import { fetchTestData } from './api/api-calls'
 import { useQuery } from '@tanstack/react-query'
-import Co2CounterWidget from "./components/widget/Co2CounterWidget"
+import Co2CounterWidget from './components/widget/Co2CounterWidget'
 
 function App() {
   const { data, error, isError, isLoading } = useQuery({
@@ -26,8 +26,7 @@ function App() {
   console.log(data)
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
-      {/* min-h-screen - app full height, flex-col - stack items vertically */}
+    <div>
       <Header />
       <Co2CounterWidget />
       <MainFeed />

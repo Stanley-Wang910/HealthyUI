@@ -1,6 +1,7 @@
-import { Box, Modal } from '@mui/material'
+import { Box, Card, Modal, Skeleton } from '@mui/material'
 import YouTube, { YouTubeEvent } from 'react-youtube'
 import React, { useEffect, useRef, useState } from 'react'
+import CardMeta from './CardMeta'
 
 const YoutubePlayerWrapper = ({ id }: { id: string }) => {
   const [timeWatched, setTimeWatched] = useState(0)
@@ -9,7 +10,6 @@ const YoutubePlayerWrapper = ({ id }: { id: string }) => {
 
   const [ready, setReady] = React.useState<boolean>(false)
 
-  // Setup and cleanup interval
   useEffect(() => {
     return () => {
       if (intervalRef.current) {
@@ -68,28 +68,44 @@ const YoutubePlayerWrapper = ({ id }: { id: string }) => {
   }
 
   return (
-    <Box sx={{ opacity: ready ? 1 : 0 }}>
-      <YouTube
-        videoId={id}
-        id={id}
-        className={'youtube-wrapper'}
-        iframeClassName={'youtube-iframe-wrapper'}
-        title={'nto sure if we need this yet'}
-        // loading={string}
-        opts={{
-          enablejsapi: 1,
-          rel: 0
-        }}
-        onReady={onReady}
-        onPlay={onPlay}
-        onPause={onPause}
-        onEnd={onEnd}
-        // onError={func}
-        onStateChange={onStateChange}
-        onPlaybackRateChange={onPlaybackRateChange}
-        onPlaybackQualityChange={onPlaybackQualityChange}
-      />
-    </Box>
+    <>
+      {!ready && (
+        <Box>
+          <Skeleton
+            sx={{ bgcolor: 'grey.900' }}
+            variant="rectangular"
+            width={640}
+            height={367}
+          />
+        </Box>
+      )}
+
+      <Box
+        sx={{ opacity: ready ? 1 : 0, position: ready ? 'auto' : 'absolute' }}
+      >
+        <YouTube
+          videoId={id}
+          id={id}
+          className={'youtube-wrapper'}
+          iframeClassName={'youtube-iframe-wrapper'}
+          title={'nto sure if we need this yet'}
+          // loading={string}
+          opts={{
+            enablejsapi: 1,
+            rel: 0
+          }}
+          onReady={onReady}
+          onPlay={onPlay}
+          onPause={onPause}
+          onEnd={onEnd}
+          // onError={func}
+          onStateChange={onStateChange}
+          onPlaybackRateChange={onPlaybackRateChange}
+          onPlaybackQualityChange={onPlaybackQualityChange}
+        />
+        {ready && <CardMeta />}
+      </Box>
+    </>
   )
 }
 export default YoutubePlayerWrapper
