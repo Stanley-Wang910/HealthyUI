@@ -24,7 +24,7 @@ class TextRank4Keyword():
         self.node_weight = None # save keywords and its weight
 
     
-    def set_stopwords(self, stopwords):  
+    def set_stopwords(self, stopwords=" "):  
         """Set stop words"""
         for word in STOP_WORDS.union(set(stopwords)):
             print("stop word:", word)   
@@ -175,9 +175,10 @@ def generate_query_strings(keywords, num_q=3, keywords_per_q=5):
     return query_strings    
             
 
-video_id = "https://www.youtube.com/watch?v=ycJGIKLE9hg"
+video_id = "https://www.youtube.com/watch?v=M1u1ECx_Nlw"
 text = get_relevant_transcript(video_id, 10)
 # text = text[0]['text']
+
 
 # start_time = time.time()
 with utils.track_memory_usage("keyword_ex3"):
@@ -191,22 +192,22 @@ for q in query_strings:
 query_string = ",".join(str(q) for q in query_strings)
 print(repr(query_string))
 
-run = 'news'
-command = ['-c', run] 
-sub_command = ['-n', query_string]
+# run = 'news'
+# command = ['-c', run] 
+# sub_command = ['-n', query_string]
 
-try:
-    print(command + sub_command)
-    result = subprocess.run(['./go/go.exe'] + command + sub_command, 
-                            capture_output=True, text=True, check=True)
-    print("Go program output:")
-    print(result.stdout)
-    if result.stderr:
-        print("Go program error output:")
-        print(result.stderr)
-except subprocess.CalledProcessError as e:
-    print(f"Error running Go program: {e}")
-    print("Error output:")
-    print(e.stderr)
-except FileNotFoundError:
-    print("Error: Go executable not found.")
+# try:
+#     print(command + sub_command)
+#     result = subprocess.run(['./go/go.exe'] + command + sub_command, 
+#                             capture_output=True, text=True, check=True)
+#     print("Go program output:")
+#     print(result.stdout)
+#     if result.stderr:
+#         print("Go program error output:")
+#         print(result.stderr)
+# except subprocess.CalledProcessError as e:
+#     print(f"Error running Go program: {e}")
+#     print("Error output:")
+#     print(e.stderr)
+# except FileNotFoundError:
+#     print("Error: Go executable not found.")
