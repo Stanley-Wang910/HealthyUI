@@ -1,90 +1,90 @@
 package main
 
-import (
-	// "flag"
-	"flag"
-	"fmt"
-	"log"
+// import (
+// 	// "flag"
+// 	"flag"
+// 	"fmt"
+// 	"log"
 
-	"strings"
+// 	"strings"
 
-	"github.com/joho/godotenv"
-	// "google.golang.org/api/youtube/v3"
-)
+// 	"github.com/joho/godotenv"
+// 	// "google.golang.org/api/youtube/v3"
+// )
 
-func main() {
-	// Load needed before any function can get variables
-	errEnv := godotenv.Load()
-	if errEnv != nil {
-		log.Fatalf("Error loading .env file: %v", errEnv)
-	}
+// func main() {
+// 	// Load needed before any function can get variables
+// 	errEnv := godotenv.Load()
+// 	if errEnv != nil {
+// 		log.Fatalf("Error loading .env file: %v", errEnv)
+// 	}
 
-	command := flag.String("command", "", "Command to run: factcheck, news, or youtube")
-	flag.StringVar(command, "c", "", "Command to run: factcheck, news, or youtube")
+// 	command := flag.String("command", "", "Command to run: factcheck, news, or youtube")
+// 	flag.StringVar(command, "c", "", "Command to run: factcheck, news, or youtube")
 
-	factCheckQueries := flag.String("q", "", "Comma seperated list of query strings for factchecktools API")
+// 	factCheckQueries := flag.String("q", "", "Comma seperated list of query strings for factchecktools API")
 
-	ytVidId := flag.String("id", "", "Video ID to send to API")
+// 	ytVidId := flag.String("id", "", "Video ID to send to API")
 
-	newsQuery := flag.String("n", "", "Comma seperated list of query strings for news API")
+// 	newsQuery := flag.String("n", "", "Comma seperated list of query strings for news API")
 
-	// newsCmd := flag.NewFlagSet("news", flag.ExitOnError)
+// 	// newsCmd := flag.NewFlagSet("news", flag.ExitOnError)
 
-	// youtubeCmd := flag.NewFlagSet("youtube", flag.ExitOnError)
+// 	// youtubeCmd := flag.NewFlagSet("youtube", flag.ExitOnError)
 
-	// check CLI arg
-	// if len(flag.Args()) < 1 {
-	// 	fmt.Println("Expected 'factcheck', 'news' or 'youtube' subcommands")
-	// 	return
-	// }
-	flag.Parse()
+// 	// check CLI arg
+// 	// if len(flag.Args()) < 1 {
+// 	// 	fmt.Println("Expected 'factcheck', 'news' or 'youtube' subcommands")
+// 	// 	return
+// 	// }
+// 	flag.Parse()
 
-	if *command == "" {
-		fmt.Println("Please provide a command: -c=factcheck, -c=news, or -c=youtube")
-		return
-	}
+// 	if *command == "" {
+// 		fmt.Println("Please provide a command: -c=factcheck, -c=news, or -c=youtube")
+// 		return
+// 	}
 
-	// factcheck
-	switch *command {
-	case "factcheck":
-		if *factCheckQueries == "" {
-			log.Fatalln("At least one query string for factcheck is required")
-		}
+// 	// factcheck
+// 	switch *command {
+// 	case "factcheck":
+// 		if *factCheckQueries == "" {
+// 			log.Fatalln("At least one query string for factcheck is required")
+// 		}
 
-		// Tokenize args by "," into []string (dynamically typed, size not defined at compile time)
-		queryList := strings.Split(*factCheckQueries, ",")
+// 		// Tokenize args by "," into []string (dynamically typed, size not defined at compile time)
+// 		queryList := strings.Split(*factCheckQueries, ",")
 
-		err := factCheckGETConcurrent(queryList)
-		if err != nil {
-			log.Fatalln("Error in factCheckGETConcurrent:", err)
-		}
+// 		err := factCheckGETConcurrent(queryList)
+// 		if err != nil {
+// 			log.Fatalln("Error in factCheckGETConcurrent:", err)
+// 		}
 
-	case "news":
-		if *newsQuery == "" {
-			log.Fatalln("At least one query string for news is required")
-		}
+// 	case "news":
+// 		if *newsQuery == "" {
+// 			log.Fatalln("At least one query string for news is required")
+// 		}
 
-		// Tokenize args by "," into []string (dynamically typed, size not defined at compile time)
-		queryList := strings.Split(*newsQuery, ",")
-		err := newsApiGETConcurrent(queryList)
-		if err != nil {
-			log.Fatalln("Error in newsAPI:", err)
-		}
+// 		// Tokenize args by "," into []string (dynamically typed, size not defined at compile time)
+// 		queryList := strings.Split(*newsQuery, ",")
+// 		err := newsApiGETConcurrent(queryList)
+// 		if err != nil {
+// 			log.Fatalln("Error in newsAPI:", err)
+// 		}
 
-	case "youtube":
-		if *ytVidId == "" {
-			log.Fatalln("At least one Video ID for YouTube API is required")
-		}
-		err := youtube(*ytVidId)
-		if err != nil {
-			log.Fatalln("Error in youtube GET", err)
-		}
+// 	case "youtube":
+// 		if *ytVidId == "" {
+// 			log.Fatalln("At least one Video ID for YouTube API is required")
+// 		}
+// 		err := youtube(*ytVidId)
+// 		if err != nil {
+// 			log.Fatalln("Error in youtube GET", err)
+// 		}
 
-	default:
-		fmt.Println("Expected '-c=factcheck', '-c=news', or '-c=youtube'")
-	}
+// 	default:
+// 		fmt.Println("Expected '-c=factcheck', '-c=news', or '-c=youtube'")
+// 	}
 
-}
+// }
 
 // func getOAuthClient(ctx context.Context) (*oauth2.Token, error) {
 

@@ -1,163 +1,162 @@
 package main
 
-import (
-	"context"
-	"encoding/json"
-	"fmt"
-	"os"
-	"sync"
+// import (
+// 	"context"
+// 	"encoding/json"
+// 	"fmt"
+// 	"os"
+// 	"sync"
 
-	factchecktools "google.golang.org/api/factchecktools/v1alpha1"
-	"google.golang.org/api/option"
-)
+// 	factchecktools "google.golang.org/api/factchecktools/v1alpha1"
+// 	"google.golang.org/api/option"
+// )
 
-type Main struct {
-	Claims []Claim `json:"claims"`
-}
+// type Main struct {
+// 	Claims []Claim `json:"claims"`
+// }
 
-type Claim struct {
-	Text        string        `json:"text"`
-	Claimant    string        `json:"claimant,omitempty"`
-	ClaimDate   string        `json:"claimDate,omitempty"`
-	ClaimReview []ClaimReview `json:"claimReview"`
-}
+// type Claim struct {
+// 	Text        string        `json:"text"`
+// 	Claimant    string        `json:"claimant,omitempty"`
+// 	ClaimDate   string        `json:"claimDate,omitempty"`
+// 	ClaimReview []ClaimReview `json:"claimReview"`
+// }
 
-type ClaimReview struct {
-	PublisherName string `json:"name"`
-	PublisherSite string `json:"site"`
-	URL           string `json:"url"`
-	Title         string `json:"title"`
-	TextualRating string `json:"textualRating"`
-	// LanguageCode  string `json:"languageCode"`
-	ReviewDate string `json:"reviewDate,omitempty"`
-}
+// type ClaimReview struct {
+// 	PublisherName string `json:"name"`
+// 	PublisherSite string `json:"site"`
+// 	URL           string `json:"url"`
+// 	Title         string `json:"title"`
+// 	TextualRating string `json:"textualRating"`
+// 	// LanguageCode  string `json:"languageCode"`
+// 	ReviewDate string `json:"reviewDate,omitempty"`
+// }
 
-type FactCheckResult struct {
-	Query          string  `json:"query"`
-	NumberofClaims int     `json:"number_of_claims"`
-	NextPageToken  string  `json:"next_page_token"`
-	Claims         []Claim `json:"claims"`
-}
+// type FactCheckResult struct {
+// 	Query          string  `json:"query"`
+// 	NumberofClaims int     `json:"number_of_claims"`
+// 	NextPageToken  string  `json:"next_page_token"`
+// 	Claims         []Claim `json:"claims"`
+// }
 
 // Return struct FactCheckResult obj and error value
-func factCheckGET(query string, svc *factchecktools.Service) (FactCheckResult, error) {
-	// Service setup
+// func factCheckGET(query string, svc *factchecktools.Service) (FactCheckResult, error) {
+// 	// Service setup
 
-	// Assign API Call on GET https://factchecktools.googleapis.com/v1alpha1/claims:search to `call`
-	call := svc.Claims.Search()
+// 	// Assign API Call on GET https://factchecktools.googleapis.com/v1alpha1/claims:search to `call`
+// 	call := svc.Claims.Search()
 
-	// Assign query header
-	call.Query(query)
-	call.LanguageCode("en-US")
+// 	// Assign query header
+// 	call.Query(query)
+// 	call.LanguageCode("en-US")
 
-	// Make the GET request
-	response, err := call.Do()
+// 	// Make the GET request
+// 	response, err := call.Do()
 
-	if err != nil {
-		return FactCheckResult{}, fmt.Errorf("failed to execute GET request: %v", err)
-	}
+// 	if err != nil {
+// 		return FactCheckResult{}, fmt.Errorf("failed to execute GET request: %v", err)
+// 	}
 
-	// Build result struct
-	result := FactCheckResult{
-		Query:          query,
-		NumberofClaims: len(response.Claims),
-		NextPageToken:  response.NextPageToken,
-		Claims:         make([]Claim, len(response.Claims)),
-	}
+// 	// Build result struct
+// 	result := FactCheckResult{
+// 		Query:          query,
+// 		NumberofClaims: len(response.Claims),
+// 		NextPageToken:  response.NextPageToken,
+// 		Claims:         make([]Claim, len(response.Claims)),
+// 	}
 
-	for i, c := range response.Claims { // Like Python enum
-		claim := Claim{
-			Text:        c.Text,
-			Claimant:    c.Claimant,
-			ClaimDate:   c.ClaimDate,
-			ClaimReview: make([]ClaimReview, len(c.ClaimReview)), // Build ClaimReview Struct in nested loop
-		}
-		for j, r := range c.ClaimReview {
-			claim.ClaimReview[j] = ClaimReview{
-				PublisherName: r.Publisher.Name,
-				PublisherSite: r.Publisher.Site,
-				URL:           r.Url,
-				Title:         r.Title,
-				TextualRating: r.TextualRating,
-				ReviewDate:    r.ReviewDate,
-			}
-		}
-		result.Claims[i] = claim
-	}
+// 	for i, c := range response.Claims { // Like Python enum
+// 		claim := Claim{
+// 			Text:        c.Text,
+// 			Claimant:    c.Claimant,
+// 			ClaimDate:   c.ClaimDate,
+// 			ClaimReview: make([]ClaimReview, len(c.ClaimReview)), // Build ClaimReview Struct in nested loop
+// 		}
+// 		for j, r := range c.ClaimReview {
+// 			claim.ClaimReview[j] = ClaimReview{
+// 				PublisherName: r.Publisher.Name,
+// 				PublisherSite: r.Publisher.Site,
+// 				URL:           r.Url,
+// 				Title:         r.Title,
+// 				TextualRating: r.TextualRating,
+// 				ReviewDate:    r.ReviewDate,
+// 			}
+// 		}
+// 		result.Claims[i] = claim
+// 	}
 
-	return result, nil
-}
+// 	return result, nil
+// }
 
-// Export with capitalized name
-func factCheckGETConcurrent(queries []string) error {
-	ctx := context.Background()
+// func factCheckGETConcurrent(queries []string) error {
+// 	ctx := context.Background()
 
-	// tok, err := getOAuthClient(ctx)
-	// if err != nil {
-	// 	return FactCheckResult{}, fmt.Errorf("failed to get OAuth client: %v", err)
-	// }
+// 	// tok, err := getOAuthClient(ctx)
+// 	// if err != nil {
+// 	// 	return FactCheckResult{}, fmt.Errorf("failed to get OAuth client: %v", err)
+// 	// }
 
-	// svc, err := factchecktools.NewService(ctx, option.WithTokenSource(oauth2.StaticTokenSource(tok)))
+// 	// svc, err := factchecktools.NewService(ctx, option.WithTokenSource(oauth2.StaticTokenSource(tok)))
 
-	googleApiKey := os.Getenv("GOOGLE_API_KEY")
-	if googleApiKey == "" {
-		return fmt.Errorf("GOOGLE_API_KEY not set in .env")
-	}
+// 	googleApiKey := os.Getenv("GOOGLE_API_KEY")
+// 	if googleApiKey == "" {
+// 		return fmt.Errorf("GOOGLE_API_KEY not set in .env")
+// 	}
 
-	svc, err := factchecktools.NewService(ctx, option.WithAPIKey(googleApiKey))
+// 	svc, err := factchecktools.NewService(ctx, option.WithAPIKey(googleApiKey))
 
-	if err != nil {
-		return fmt.Errorf("failed to create service: %v", err)
-	}
+// 	if err != nil {
+// 		return fmt.Errorf("failed to create service: %v", err)
+// 	}
 
-	// Create wg Wait Group: used to wait for concurrent calls to finish before returning
-	var wg sync.WaitGroup
+// 	// Create wg Wait Group: used to wait for concurrent calls to finish before returning
+// 	var wg sync.WaitGroup
 
-	// Create buffered channel to store as many results as len(queries)
-	results := make(chan struct {
-		query  string
-		result FactCheckResult
-		err    error
-	}, len(queries))
+// 	// Create buffered channel to store as many results as len(queries)
+// 	results := make(chan struct {
+// 		query  string
+// 		result FactCheckResult
+// 		err    error
+// 	}, len(queries))
 
-	for _, query := range queries {
-		wg.Add(1) // Increment counter before starting a call
-		// Start multiple go routines, each making API GET request for their query
-		go func(q string) {
-			defer wg.Done() // Decrement counter when call finishes
-			result, err := factCheckGET(q, svc)
-			results <- struct {
-				query  string
-				result FactCheckResult
-				err    error
-			}{q, result, err}
-		}(query) // Pass query into go func() as q
-	}
+// 	for _, query := range queries {
+// 		wg.Add(1) // Increment counter before starting a call
+// 		// Start multiple go routines, each making API GET request for their query
+// 		go func(q string) {
+// 			defer wg.Done() // Decrement counter when call finishes
+// 			result, err := factCheckGET(q, svc)
+// 			results <- struct {
+// 				query  string
+// 				result FactCheckResult
+// 				err    error
+// 			}{q, result, err}
+// 		}(query) // Pass query into go func() as q
+// 	}
 
-	go func() {
-		wg.Wait() // Wait until wg counter reaches 0 before closing channel
-		close(results)
-	}()
+// 	go func() {
+// 		wg.Wait() // Wait until wg counter reaches 0 before closing channel
+// 		close(results)
+// 	}()
 
-	// Map of results including successful API Calls and error strings
-	allResults := make(map[string]FactCheckResult) // All values in this map must be of type FactCheckResult
+// 	// Map of results including successful API Calls and error strings
+// 	allResults := make(map[string]FactCheckResult) // All values in this map must be of type FactCheckResult
 
-	// Processing of results channel starts immediately after starting go routines
-	// Runs alongside API calls, until wg == 0 and channel closes
-	for res := range results { // Passing struct values sent to results channel
-		if res.err != nil {
-			fmt.Printf("Error for one query: %s : %v\n", res.query, res.err)
-		} else {
-			allResults[res.query] = res.result
-		}
-	}
+// 	// Processing of results channel starts immediately after starting go routines
+// 	// Runs alongside API calls, until wg == 0 and channel closes
+// 	for res := range results { // Passing struct values sent to results channel
+// 		if res.err != nil {
+// 			fmt.Printf("Error for one query: %s : %v\n", res.query, res.err)
+// 		} else {
+// 			allResults[res.query] = res.result
+// 		}
+// 	}
 
-	// Convert map into JSON-formatted string with indents and newlines
-	jsonOutput, err := json.MarshalIndent(allResults, "", " ")
-	if err != nil {
-		return fmt.Errorf("error marshaling JSON: %v", err)
-	}
+// 	// Convert map into JSON-formatted string with indents and newlines
+// 	jsonOutput, err := json.MarshalIndent(allResults, "", " ")
+// 	if err != nil {
+// 		return fmt.Errorf("error marshaling JSON: %v", err)
+// 	}
 
-	fmt.Println(string(jsonOutput))
-	return nil
-}
+// 	fmt.Println(string(jsonOutput))
+// 	return nil
+// }
