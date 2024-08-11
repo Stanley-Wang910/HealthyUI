@@ -1,14 +1,19 @@
 from typing import List, TypedDict
+from faker import Factory
+
+fake = Factory.create()
 
 
 class VideoMeta(TypedDict):
     spectrum_calc: float
     placeholder: str
-
+    title: str
+    description: str
 
 
 class VideoInfo(TypedDict):
     id: str
+
     title: str
     thumbnail: str
     channel_thumbnail: str
@@ -29,8 +34,11 @@ def get_user_videos_playlist_service():
             'views': '3.4M views',
             'date': '6 months ago',
             'meta': {
+                'title': fake.text(max_nb_chars =20 ),
                 'spectrum_calc': 0.1,
-                'placeholder': "placeholder metadata decorator"
+                'placeholder': fake.text(max_nb_chars =100 ),
+                'description': fake.text(max_nb_chars =250 )
+
             }
         },
         {
@@ -42,8 +50,11 @@ def get_user_videos_playlist_service():
             'views': '3.4M views',
             'date': '6 months ago',
             'meta': {
+                'title': fake.text(max_nb_chars =20 ),
                 'spectrum_calc': 0.7,
-                'placeholder': "placeholder metadata decorator"
+                'placeholder': fake.text(max_nb_chars =100 ),
+                'description': fake.text(max_nb_chars =250 )
+
 
             }
         },
@@ -56,8 +67,10 @@ def get_user_videos_playlist_service():
             'views': '3.4M views',
             'date': '6 months ago',
             'meta': {
+                'title': fake.text(max_nb_chars =20 ),
                 'spectrum_calc': 0.7,
-                'placeholder': "placeholder metadata decorator"
+                'placeholder': fake.text(max_nb_chars =100 ),
+                'description': fake.text(max_nb_chars =250 )
 
             }
         },
@@ -70,8 +83,10 @@ def get_user_videos_playlist_service():
             'views': '3.4M views',
             'date': '6 months ago',
             'meta': {
+                'title': fake.text(max_nb_chars =20 ),
                 'spectrum_calc': 0.7,
-                'placeholder': "placeholder metadata decorator"
+                'placeholder': fake.text(max_nb_chars =100 ),
+                'description': fake.text(max_nb_chars =250 )
 
             }
         },
@@ -84,8 +99,10 @@ def get_user_videos_playlist_service():
             'views': '3.4M views',
             'date': '6 months ago',
             'meta': {
+                'title': fake.text(max_nb_chars =20 ),
                 'spectrum_calc': 0.2,
-                'placeholder': "placeholder metadata decorator"
+                'placeholder': fake.text(max_nb_chars =100 ),
+                'description': fake.text(max_nb_chars =250 )
 
             }
         },
@@ -98,8 +115,10 @@ def get_user_videos_playlist_service():
             'views': '3.4M views',
             'date': '6 months ago',
             'meta': {
+                'title': fake.text(max_nb_chars =20 ),
                 'spectrum_calc': 0.6,
-                'placeholder': "placeholder metadata decorator"
+                'placeholder': fake.text(max_nb_chars =100 ),
+                'description': fake.text(max_nb_chars =250 )
 
             }
         },

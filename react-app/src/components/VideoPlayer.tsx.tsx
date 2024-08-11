@@ -1,9 +1,16 @@
-import { Box, Card, Modal, Skeleton } from '@mui/material'
+import { Box, Skeleton } from '@mui/material'
 import YouTube, { YouTubeEvent } from 'react-youtube'
 import React, { useEffect, useRef, useState } from 'react'
 import CardMeta from './CardMeta'
+import { VideoType } from '../api/dto'
 
-const YoutubePlayerWrapper = ({ id }: { id: string }) => {
+const YoutubePlayerWrapper = ({
+  id,
+  meta
+}: {
+  id: string
+  meta?: VideoType['meta']
+}) => {
   const [timeWatched, setTimeWatched] = useState(0)
   const intervalRef = useRef(null)
   const playerRef = useRef(null)
@@ -89,7 +96,6 @@ const YoutubePlayerWrapper = ({ id }: { id: string }) => {
           className={'youtube-wrapper'}
           iframeClassName={'youtube-iframe-wrapper'}
           title={'nto sure if we need this yet'}
-          // loading={string}
           opts={{
             enablejsapi: 1,
             rel: 0
@@ -103,7 +109,7 @@ const YoutubePlayerWrapper = ({ id }: { id: string }) => {
           onPlaybackRateChange={onPlaybackRateChange}
           onPlaybackQualityChange={onPlaybackQualityChange}
         />
-        {ready && <CardMeta />}
+        {ready && meta && <CardMeta meta={meta} />}
       </Box>
     </>
   )

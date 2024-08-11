@@ -1,22 +1,19 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
 import subprocess
-import shlex
 import json
-import os
-from services import get_user_videos_playlist_service
+from services import user_videos
 
 app = Flask(__name__)
 
-CORS(app, supports_credentials=True, origins=['http://localhost:3000'])
-
-
-# @app.route('/api/test', methods=['GET'])
-
+# CORS(app, supports_credentials=True, origins=['*'])
+# the supports credentials option is bugging sometimes
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 @app.route('/api/video/get-playlist')
 def get_user_videos_playlist():
-    return jsonify(get_user_videos_playlist_service())
+    return jsonify(user_videos.get_user_videos_playlist_service())
 
 
 @app.route('/api/test')

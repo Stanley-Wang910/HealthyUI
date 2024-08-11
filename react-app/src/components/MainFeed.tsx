@@ -5,7 +5,7 @@ import { fetchUserVideos } from '../api/api-calls'
 import { VideoType } from '../api/dto'
 import { useQuery } from '@tanstack/react-query'
 import YoutubePlayerWrapper from './VideoPlayer.tsx'
-import { Box, Grid, Modal } from '@mui/material'
+import { Grid, Modal } from '@mui/material'
 
 const MainFeed = () => {
   const { data, error, isError, isLoading } = useQuery({
@@ -14,6 +14,7 @@ const MainFeed = () => {
   })
   const [open, setOpen] = React.useState<boolean>(false)
   const [videoId, setVideoId] = React.useState<string>('')
+  const [meta, setVideoMeta] = React.useState<VideoType['meta']>()
 
   const handleOpen = () => {
     setOpen(true)
@@ -43,7 +44,8 @@ const MainFeed = () => {
     title,
     author,
     viewCount,
-    date
+    date,
+    meta
   }: {
     id: string
     videoThumbnail: string
@@ -52,12 +54,14 @@ const MainFeed = () => {
     author: string
     viewCount: string
     date: string
+    meta: VideoType['meta']
   }) => {
     return (
       <div
         className="preview"
         onClick={() => {
           setVideoId(id)
+          setVideoMeta(meta)
           setOpen(true)
         }}
       >
@@ -99,6 +103,7 @@ const MainFeed = () => {
                 author={item.author}
                 viewCount={item.views}
                 date={item.date}
+                meta={item.meta}
               />
             </Grid>
           )
@@ -119,7 +124,7 @@ const MainFeed = () => {
           p: 3
         }}
       >
-        <YoutubePlayerWrapper id={videoId} />
+        <YoutubePlayerWrapper id={videoId} meta={meta} />
       </Modal>
     </>
   )
