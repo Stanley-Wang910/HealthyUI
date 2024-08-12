@@ -10,7 +10,7 @@ p {
 p:hover {
   letter-spacing: 5px;
   transition: 1s;
-  text-shadow: 1px 1px 2px rgb(0, 247, 255), 0 0 1em rgb(40, 107, 231), 0 0 0.2em rgb(40, 107, 231);
+  text-shadow: 1px 1px 2px rgb(0, 247, 255), 0 0 1em rgb(0, 247, 255), 0 0 0.2em rgb(0, 247, 255);
 }
 
 iframe {
