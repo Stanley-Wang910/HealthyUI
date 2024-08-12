@@ -3,6 +3,7 @@ certifi==2024.7.4
 charset-normalizer==3.3.2
 click==8.1.7
 colorama==0.4.6
+colorlog==6.8.2
 Faker==26.3.0
 Flask==3.0.3
 Flask-Cors==4.0.1
@@ -14,6 +15,7 @@ joblib==1.4.2
 MarkupSafe==2.1.5
 nltk==3.8.2
 numpy==2.0.1
+psutil==6.0.0
 python-dateutil==2.9.0.post0
 regex==2024.7.24
 requests==2.32.3
