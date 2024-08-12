@@ -3,8 +3,9 @@ from faker import Factory
 
 fake = Factory.create()
 
+from go_interface import youtube_cc 
+
 from dummy_data import video_list
-from go_functions import youtube_cc
 
 youtube_ids = [b'ARPzNBahjEg', b'aAbjtW7ZtmU', b'_ZTZGz1xusA', b'Nkq_mI2PlM8', b'Cl3izXcp86w', b'0w3NtkYRtDM']
 
