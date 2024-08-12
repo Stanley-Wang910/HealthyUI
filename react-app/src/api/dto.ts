@@ -6,4 +6,10 @@ export type VideoType = {
   author: string
   views: string
   date: string
+  meta: {
+    spectrum_calc: number
+    title: string
+    placeholder: string
+    description: string
+  }
 }

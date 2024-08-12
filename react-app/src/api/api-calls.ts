@@ -11,7 +11,10 @@ export const fetchTestData = async () => {
   return data
 }
 
-export const fetchUserVideos = async () => {
-  const { data } = await axios.get(`${apiHost}/api/video/get-playlist`)
+export const fetchUserVideos = async (keyword?: string) => {
+  const encoded = keyword ? encodeURI(keyword) : ''
+  const { data } = await axios.get(
+    `${apiHost}/api/video/get-playlist/${encoded}`
+  )
   return data
 }
