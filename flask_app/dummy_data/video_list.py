@@ -3,9 +3,6 @@ import random
 
 fake = Factory.create()
 
-def hello():
-    print('asdf')
-
 
 def get_video_list_by_keyword(keyword: str):
     new_video_list = get_video_list()
