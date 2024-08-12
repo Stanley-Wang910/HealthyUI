@@ -1,13 +1,14 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
 import subprocess
-import shlex
 import json
 import os
 import go_interface
 import utils
 from yt_transcript import get_relevant_transcript
 import keyword_ex
+from services import user_videos
+
 
 
 trk = keyword_ex.TextRankKeyword()
@@ -15,13 +16,27 @@ trk = keyword_ex.TextRankKeyword()
 
 app = Flask(__name__)
 
-CORS(app, supports_credentials=True, origins=['http://localhost:3000'])
+# CORS(app, supports_credentials=True, origins=['*'])
+# the supports credentials option is bugging sometimes
+CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
-# @app.route('/api/test', methods=['GET']) 
 
-@app.route('/test')
+@app.route('/api/test')
 def test():
     return jsonify({'message': 'Hello World!'})
+
+
+@app.route('/api/video/get-playlist/<keyword>')
+@app.route('/api/video/get-playlist/', defaults={'keyword': None})
+def get_user_videos_playlist(keyword: str):
+
+    if keyword:
+        print(f"Keyword provided: {keyword}")
+    else:
+        print("No keyword provided")
+    return jsonify(user_videos.get_user_videos_playlist_service(keyword))
+
 
 @app.route('/api')
 def run_factcheck_go():

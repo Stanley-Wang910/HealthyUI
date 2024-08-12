@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom/client'
 import './index.css'
 import App from './App'
 import reportWebVitals from './reportWebVitals'
-import { QueryClient, QueryClientProvider } from 'react-query'
 import { CacheProvider } from '@emotion/react'
 import createCache from '@emotion/cache'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
@@ -13,7 +12,8 @@ import {
   ThemeProvider
 } from '@mui/material/styles'
 import { CssBaseline } from '@mui/material'
-import StyleExamples from "./components/examples/StyleExamples"
+import StyleExamples from './components/examples/StyleExamples'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 const cache = createCache({
   key: 'css',

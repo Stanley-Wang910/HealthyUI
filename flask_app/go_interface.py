@@ -1,8 +1,10 @@
 import ctypes
 import os
 import json
-import sys
 import utils
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Load library
 with utils.track_memory_usage("Loading library"):
@@ -108,6 +110,7 @@ def news_api_cc(news_queries):
 def youtube_cc(ids, most_replayed=False):
     id_array = (ctypes.c_char_p * len(ids))(*ids) 
     google_api_key = os.getenv('GOOGLE_API_KEY')
+
     if not google_api_key:
         raise ValueError('GOOGLE_API_KEY not set in .env')
         
@@ -129,8 +132,8 @@ def youtube_cc(ids, most_replayed=False):
                 log_error(f"Exception type: {type(e)}")
 
             print(f"Allocated memory after freeing: {get_alloc_count()}")
-
-            # return (json.dumps(json.loads(result_str), indent=2))
+           # # return (json.dumps(json.loads(result_str), indent=2))
+            return json.loads(result_str)
             return json.loads(result_str)
         else:
             print('Error: No result returned from youtube GET')
