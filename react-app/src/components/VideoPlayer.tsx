@@ -56,12 +56,9 @@ const YoutubePlayerWrapper = ({
         const currentTime = playerRef.current?.getCurrentTime()
         const deltaTime = currentTime - prevTimeRef.current
 
-        console.log('currentTime', currentTime)
-        console.log('prevTime', prevTimeRef.current)
-
-        prevTimeRef.current = currentTime // Update the ref
-        console.log('deltaTime', deltaTime)
-
+        // quick fix for if user if skipping around on the video, 2 is arbitrary number
+        // this mechanism could be cleaner
+        prevTimeRef.current = currentTime
         if (deltaTime > 2) {
           return
         }
