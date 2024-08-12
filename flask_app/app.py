@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 # CORS(app, supports_credentials=True, origins=['*'])
 # the supports credentials option is bugging sometimes
-cors = CORS(app)
+CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
 

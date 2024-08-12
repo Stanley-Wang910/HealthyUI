@@ -1,8 +1,10 @@
 import ctypes
 import os
 import json
-import sys
 import utils
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Load library
 with utils.track_memory_usage("Loading library"):
@@ -103,6 +105,7 @@ def news_api_cc(news_queries):
 def youtube_cc(ids):
     id_array = (ctypes.c_char_p * len(ids))(*ids) 
     google_api_key = os.getenv('GOOGLE_API_KEY')
+
     if not google_api_key:
         raise ValueError('GOOGLE_API_KEY not set in .env')
         
@@ -122,8 +125,8 @@ def youtube_cc(ids):
                 log_error(f"Exception type: {type(e)}")
 
             print(f"Allocated memory after freeing: {get_alloc_count()}")
-
-            print(json.dumps(json.loads(result_str), indent=2))
+           # print(json.dumps(json.loads(result_str), indent=2))
+            return json.loads(result_str)
         else:
             print('Error: No result returned from youtube GET')
     except Exception as e:
@@ -134,7 +137,7 @@ def youtube_cc(ids):
 
 fc_queries = [b'JD Vance Couch', b'Global Warming', b'Olympics', b'Ukraine', b'COVID-19', b'Russia', b'Trump', b'Donald Trump']
 # news_queries = [b'Global Warming', b'COVID-19', b'Olympics']
-# youtube_ids = [b'_ZTZGz1xusA', b'Nkq_mI2PlM8', b'Cl3izXcp86w']
+youtube_ids = [b'_ZTZGz1xusA', b'Nkq_mI2PlM8', b'Cl3izXcp86w']
 
 # with utils.track_memory_usage("Fact check GET concurrent (single query)"):
 #     for q in fc_queries:
