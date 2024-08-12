@@ -1,13 +1,18 @@
 import http.client
 import json
 from youtube_transcript_api import YouTubeTranscriptApi
+import go_interface
+import re
+import keyword_ex
+
+trk = keyword_ex.TextRankKeyword()
 
 import utils
 
 def get_most_replayed_sections(video_id):
     conn = http.client.HTTPSConnection("yt.lemnoslife.com")
 
-    headersList = {
+    headersList = { 
     "Accept": "*/*",
     }
 
@@ -22,8 +27,8 @@ def get_most_replayed_sections(video_id):
 
     return result_json
 
-def get_peak_rewatched_timestamps(result_json):
-    markers = result_json['items'][0]['mostReplayed']['markers']
+def get_peak_rewatched_timestamps(result_json, video_id):
+    markers = result_json[video_id]['MostReplayed']['items'][0]['mostReplayed']['markers']
     sorted_markers = sorted(markers, key=lambda x: x['intensityScoreNormalized'], reverse=True)    
     top_markers = sorted_markers[:10]
     top_timestamps_seconds = [marker['startMillis'] / 1000 for marker in top_markers]
@@ -41,9 +46,11 @@ def get_transcript(video_id, timestamps):
             print("manual transcript found")
             # print(transcript_manual.fetch())
             if timestamps is not None:
-                return (transcript_manual.fetch()) # with timestamps
+                transcript_manual = transcript_manual.fetch()
+                return (transcript_manual, "manual") # with timestamps
             else:
-                return (transcript_manual.translate(['en, en-US']).fetch()[0]['text']) # without timestamps
+                transcript_manual = transcript_manual.translate(['en, en-US']).fetch()[0]['text']
+                return (transcript_manual, "manual") # without timestamps
     except Exception as e:
         print("No manual transcript found")
         try:
@@ -51,13 +58,26 @@ def get_transcript(video_id, timestamps):
             if transcript_auto is not None:
                 print("auto transcript found")
                 if timestamps is not None:
-                    return (transcript_auto.fetch()) # with timestamps
+                    return (transcript_auto.fetch(), "auto") # with timestamps
                 else:
                     transcript_auto = transcript_auto.translate('en').fetch()[0]['text']
-                    return (transcript_auto) # without timestamps
+                    return (transcript_auto, "auto") # without timestamps
 
         except Exception as e:
             print("No auto transcript found")
+
+def clean_transcript(transcript):
+    print("cleaning transcript")
+    for entry in transcript:
+        # Remove all newlines
+        entry['text'] = re.sub(r'\n', ' ', entry['text'])
+        # Remove escape characters
+        entry['text'] = re.sub(r'\\', '', entry['text'])
+        # Remove non-breaking spaces
+        entry['text'] = entry['text'].replace('\xa0', ' ')
+        # Remove extra spaces
+        entry['text'] = re.sub(r'\s+', ' ', entry['text']).strip()
+    return transcript
 
 
 def find_close_entries(timestamps, transcript, tolerance_sec=20):
@@ -120,42 +140,54 @@ def sort_entries(entries, timestamps, option="asc"):
 
     return relevant_transcript
 
-def get_relevant_transcript(video_id, tolerance_sec=20, option="asc"):
+def get_relevant_transcript(video_ids, tolerance_sec=20, option="asc"):
     # Splice link
-    # https://www.youtube.com/watch?v=vo4pMVb0R6M&t=65s
-    if "/" in video_id:
-        video_id = video_id.split("?v=")[-1].split("&t=")[0] if "&t=" in video_id else video_id.split("?v=")[-1]
-        print(f"video_id: {video_id}")
+    video_id_map = {}
+    for i, video_id in enumerate(video_ids):
+        if "/" in video_id:
+            video_id = video_id.split("?v=")[-1].split("&t=")[0] if "&t=" in video_id else video_id.split("?v=")[-1]
+            print(f"video_id: {video_id}")
 
-    res = None
-    with utils.track_memory_usage("get_most_replayed_sections"):
-        try:
-            res = get_most_replayed_sections(video_id)
+        byte_id = video_id.encode('utf-8')
+        video_id_map[video_id] = byte_id
+        # replace in-place
+        video_ids[i] = byte_id
 
-        except Exception as e:
-            print("No most replayed sections found")
+    print(video_id_map)
+    res = go_interface.youtube_cc(video_ids, most_replayed=True)
+
+    transcript_list = {}
+    for video_id, byte_id in video_id_map.items():
+        if res[video_id]['MostReplayed'] is not None:
+            try:
+                timestamps = get_peak_rewatched_timestamps(res, video_id)
+                print(timestamps)
+            except Exception as e:
+                print("No peak rewatched timestamps found")
+                timestamps = None
+
+        with utils.track_memory_usage("get_transcript"):
+            transcript, source = get_transcript(video_id, timestamps)
+
+            if source == "manual":
+                transcript = clean_transcript(transcript)
         
-    try:
-        timestamps = get_peak_rewatched_timestamps(res)
-        print(timestamps)
-    except Exception as e:
-        print("No peak rewatched timestamps found")
-        timestamps = None
+        if timestamps is not None:
+            entries = find_close_entries(timestamps, transcript, tolerance_sec=tolerance_sec) # Default returns ascending
+            relevant_transcript = sort_entries(entries, timestamps)
+            transcript_list[video_id] = {
+                "text": relevant_transcript,
+                "source": source
+            }
+        else:
+            transcript_list[video_id] = {
+                "text": transcript,
+                "source": source
+            }
+            
 
-    with utils.track_memory_usage("get_transcript"):
-        transcript = get_transcript(video_id, timestamps)
-    
-    if timestamps is not None:
-        entries = find_close_entries(timestamps, transcript, tolerance_sec=tolerance_sec) # Default returns ascending
-        relevant_transcript = sort_entries(entries, timestamps)
-        return relevant_transcript
-    
-    else:
-        return transcript
+    return transcript_list
 
-
-
-# video_id = "cA5C5SIGECs"
 # transcript = get_transcript(video_id)
 # print(transcript)
 # # t = get_transcript(video_id)

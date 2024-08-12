@@ -8,7 +8,6 @@ import subprocess
 import json
 import random
 from itertools import islice
-from yt_transcript import get_relevant_transcript
 
 # https://readmedium.com/en/https:/towardsdatascience.com/textrank-for-keyword-extraction-by-python-c0bae21bcec0
 
@@ -22,9 +21,10 @@ class TextRankKeyword():
         self.min_diff = 1e-5 # convergence threshold
         self.steps = 10 # iteration steps
         self.node_weight = None # save keywords and its weight
+        self.set_stopwords()
 
     
-    def set_stopwords(self, stopwords=" "):  
+    def set_stopwords(self, stopwords=[" ", ","]):  
         """Set stop words"""
         for word in STOP_WORDS.union(set(stopwords)):
             print("stop word:", word)   
@@ -40,6 +40,10 @@ class TextRankKeyword():
             while i < len(sent):
                 token = sent[i]
 
+                # skip stopwords and punctuation
+                if token.is_stop or token.is_punct:
+                    i += 1
+                    continue
                 # named entity recognition NER
                 if token.ent_type_ and token.is_stop is False:
                     ent = doc[token.i:token.i+len(token.ent_iob_)]
@@ -157,41 +161,26 @@ class TextRankKeyword():
         node_weight = {word: pr[index] for word, index in vocab.items()}
         self.node_weight = node_weight
 
-def generate_query_strings(keywords, num_q=3, keywords_per_q=5):
-    query_strings = []
-    keyword_items = list(keywords.items())
-    for q in range(num_q):
-        chosen_keywords = random.sample(keyword_items, keywords_per_q) # random.sample foruniqueness
+    def generate_query_strings(self, keywords, num_q=3, keywords_per_q=5):
+        query_strings = []
+        keyword_items = list(keywords.items())
+        for q in range(num_q):
+            chosen_keywords = random.sample(keyword_items, keywords_per_q) # random.sample foruniqueness
 
-        # Reorder based on original keywords order
-        chosen_keywords.sort(key=lambda x: x[1], reverse=True)
-        print(f"Query { + 1} keywords: {chosen_keywords}")
+            # Reorder based on original keywords order
+            chosen_keywords.sort(key=lambda x: x[1], reverse=True)
+            print(f"Query { + 1} keywords: {chosen_keywords}")
 
-        query_str = ' '.join(keyword for keyword, _ in chosen_keywords)
-        query_strings.append(query_str)
-        print(f"Query {q + 1} string:", query_str)
-        print()
+            query_str = ' '.join(keyword for keyword, _ in chosen_keywords)
+            query_strings.append(query_str)
+            print(f"Query {q + 1} string:", query_str)
+            print()
 
-    return query_strings    
+        return query_strings    
             
-
-video_id = "https://www.youtube.com/watch?v=alp_Sx5qhn0"
-text = get_relevant_transcript(video_id, 10)
-# text = text[0]['text']
 
 
 # start_time = time.time()
-with utils.track_memory_usage("keyword_ex3"):
-    trk = TextRankKeyword()
-    trk.analyze(text, candidate_pos = ['NOUN', 'PROPN'], window_size=4, lower=False)
-    keywords = trk.get_keywords(10)
-
-query_strings = generate_query_strings(keywords, num_q=3, keywords_per_q=5)
-for q in query_strings:
-    print("Query string:", repr(q)) # print query string in true form
-query_string = ",".join(str(q) for q in query_strings)
-print(repr(query_string))
-
 # run = 'news'
 # command = ['-c', run] 
 # sub_command = ['-n', query_string]
