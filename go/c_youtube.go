@@ -37,14 +37,14 @@ type Item struct {
 }
 
 type Snippet struct {
-	PublishedAt string `json:"publishedAt"`
-	ChannelID   string `json:"channelId"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	// Thumbnails           Thumbnails `json:"thumbnails"`
-	ChannelTitle string   `json:"channelTitle"`
-	Tags         []string `json:"tags"`
-	CategoryID   string   `json:"categoryId"`
+	PublishedAt  string     `json:"publishedAt"`
+	ChannelID    string     `json:"channelId"`
+	Title        string     `json:"title"`
+	Description  string     `json:"description"`
+	Thumbnails   Thumbnails `json:"thumbnails"`
+	ChannelTitle string     `json:"channelTitle"`
+	Tags         []string   `json:"tags"`
+	CategoryID   string     `json:"categoryId"`
 	// LiveBroadcastContent string     `json:"liveBroadcastContent"`
 	// DefaultLanguage      string     `json:"defaultLanguage"`
 	// Localized            Localized  `json:"localized"`
