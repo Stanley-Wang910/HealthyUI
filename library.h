@@ -35,7 +35,7 @@ typedef struct { const char *p; ptrdiff_t n; } _GoString_;
 
 #line 1 "cgo-generated-wrapper"
 
-#line 11 "library.go"
+#line 12 "c_youtube.go"
  #include <stdbool.h>
  #include <stdint.h>
  #include <stdio.h>
@@ -43,7 +43,7 @@ typedef struct { const char *p; ptrdiff_t n; } _GoString_;
 
 #line 1 "cgo-generated-wrapper"
 
-#line 12 "youtube.go"
+#line 11 "library.go"
  #include <stdbool.h>
  #include <stdint.h>
  #include <stdio.h>
@@ -107,9 +107,9 @@ extern "C" {
 
 extern __declspec(dllexport) char* FactCheckGETConcurrent(char** _queries, int queryCount, char* _googleApiKey);
 extern __declspec(dllexport) char* NewsApiGETConcurrent(char** _queries, int queryCount, char* _newsApiKey);
+extern __declspec(dllexport) char* YoutubeGETConcurrent(char** _ids, int idCount, char* _googleApiKey);
 extern __declspec(dllexport) _Bool FreeResult(char* result);
 extern __declspec(dllexport) int GetAllocCount();
-extern __declspec(dllexport) char* YoutubeGETConcurrent(char** _ids, int idCount, char* _googleApiKey);
 
 #ifdef __cplusplus
 }

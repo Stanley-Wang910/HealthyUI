@@ -1,16 +1,13 @@
 package main
 
 import (
-	// "flag"
 	"fmt"
 	"log"
 
-	// "strings"
 	"time"
 	"unsafe"
 
 	"github.com/joho/godotenv"
-	// "google.golang.org/api/youtube/v3"
 )
 
 // #include <stdbool.h>
