@@ -1,4 +1,5 @@
 .env
 .vscode/
 *venv/
-flask_app/__pycache__/*
+**/__pycache__/
+*.dll
