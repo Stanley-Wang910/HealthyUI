@@ -4,7 +4,6 @@ from youtube_transcript_api import YouTubeTranscriptApi
 
 import utils
 
-
 def get_most_replayed_sections(video_id):
     conn = http.client.HTTPSConnection("yt.lemnoslife.com")
 

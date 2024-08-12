@@ -19,7 +19,33 @@ typedef struct { const char *p; ptrdiff_t n; } _GoString_;
 /* Start of preamble from import "C" comments.  */
 
 
-#line 17 "library.go"
+#line 14 "c_factcheck.go"
+ #include <stdbool.h>
+ #include <stdint.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+
+#line 1 "cgo-generated-wrapper"
+
+#line 12 "c_newsapi.go"
+ #include <stdbool.h>
+ #include <stdint.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+
+#line 1 "cgo-generated-wrapper"
+
+#line 11 "library.go"
+ #include <stdbool.h>
+ #include <stdint.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+
+#line 1 "cgo-generated-wrapper"
+
+#line 12 "youtube.go"
+ #include <stdbool.h>
+ #include <stdint.h>
  #include <stdio.h>
  #include <stdlib.h>
 
@@ -80,7 +106,10 @@ extern "C" {
 #endif
 
 extern __declspec(dllexport) char* FactCheckGETConcurrent(char** _queries, int queryCount, char* _googleApiKey);
-extern __declspec(dllexport) void FreeResult(char* result);
+extern __declspec(dllexport) char* NewsApiGETConcurrent(char** _queries, int queryCount, char* _newsApiKey);
+extern __declspec(dllexport) _Bool FreeResult(char* result);
+extern __declspec(dllexport) int GetAllocCount();
+extern __declspec(dllexport) char* YoutubeGETConcurrent(char** _ids, int idCount, char* _googleApiKey);
 
 #ifdef __cplusplus
 }
