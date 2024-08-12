@@ -11,14 +11,20 @@ app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
-@app.route('/api/video/get-playlist')
-def get_user_videos_playlist():
-    return jsonify(user_videos.get_user_videos_playlist_service())
-
 
 @app.route('/api/test')
 def test():
     return jsonify({'message': 'Hello World!'})
+
+
+@app.route('/api/video/get-playlist/<keyword>')
+@app.route('/api/video/get-playlist/', defaults={'keyword': None})
+def get_user_videos_playlist(keyword: str):
+    if keyword:
+        print(f"Keyword provided: {keyword}")
+    else:
+        print("No keyword provided")
+    return jsonify(user_videos.get_user_videos_playlist_service(keyword))
 
 
 @app.route('/api')

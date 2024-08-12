@@ -4,13 +4,13 @@ import '../styles/MainFeed.css'
 import { fetchUserVideos } from '../api/api-calls'
 import { VideoType } from '../api/dto'
 import { useQuery } from '@tanstack/react-query'
-import YoutubePlayerWrapper from './VideoPlayer.tsx'
+import YoutubePlayerWrapper from './VideoPlayer'
 import { Grid, Modal } from '@mui/material'
 
 const MainFeed = () => {
   const { data, error, isError, isLoading } = useQuery({
     queryKey: ['fetchUserVideos'],
-    queryFn: fetchUserVideos
+    queryFn: () => fetchUserVideos('')
   })
   const [open, setOpen] = React.useState<boolean>(false)
   const [videoId, setVideoId] = React.useState<string>('')
@@ -94,17 +94,19 @@ const MainFeed = () => {
         {data.map((item: VideoType, index: number) => {
           return (
             <Grid item xs={4}>
-              <VideoBlock
-                key={item.id}
-                id={item.id}
-                videoThumbnail={item.thumbnail}
-                profileThumbnail={item.thumbnail}
-                title={item.title}
-                author={item.author}
-                viewCount={item.views}
-                date={item.date}
-                meta={item.meta}
-              />
+              <div style={{ cursor: 'pointer' }}>
+                <VideoBlock
+                  key={item.id}
+                  id={item.id}
+                  videoThumbnail={item.thumbnail}
+                  profileThumbnail={item.thumbnail}
+                  title={item.title}
+                  author={item.author}
+                  viewCount={item.views}
+                  date={item.date}
+                  meta={item.meta}
+                />
+              </div>
             </Grid>
           )
         })}
