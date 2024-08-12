@@ -2,7 +2,7 @@ import { Box, Skeleton } from '@mui/material'
 import YouTube, { YouTubeEvent } from 'react-youtube'
 import React, { useEffect, useRef, useState } from 'react'
 import { VideoType } from '../api/dto'
-import CardMeta from "./widget/CardMeta";
+import CardMeta from './widget/CardMeta'
 
 const YoutubePlayerWrapper = ({
   id,
@@ -32,18 +32,18 @@ const YoutubePlayerWrapper = ({
   }, [timeWatched])
 
   const onReady = (evt: YouTubeEvent) => {
-    console.log('onReady')
+    console.log('ready')
     setReady(true)
     playerRef.current = evt.target // Save the player reference on ready
   }
   const onPlay = (evt: YouTubeEvent) => {
-    console.log('onReady')
+    console.log('play')
   }
   const onPause = (evt: YouTubeEvent) => {
-    console.log('onReady')
+    console.log('paused')
   }
   const onEnd = (evt: YouTubeEvent) => {
-    console.log('onReady')
+    console.log('ended')
   }
 
   const onStateChange = (evt: YouTubeEvent) => {

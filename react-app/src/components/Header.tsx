@@ -63,7 +63,6 @@ const Header = () => {
           <MenuIcon
             style={{ cursor: 'pointer' }}
             onClick={() => {
-              console.log('toggle drawer')
               toggleDrawer(true)
             }}
           />

@@ -24,7 +24,6 @@ const MainFeed = () => {
   }
 
   if (isLoading) {
-    console.error('loading')
     // don't block rendering for now but use this pattern in sub components to show
     // render blocking API requests
     return (
@@ -50,8 +49,6 @@ const MainFeed = () => {
 
   if (isError) {
     console.error('Error fetching data', error)
-    // don't block rendering for now
-    // return <div>Error fetching data</div>;
     return <div>error</div>
   }
 
