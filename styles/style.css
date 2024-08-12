@@ -1,20 +1,38 @@
 h1,
 h2,
+h3,
 p {
     color: rgb(40, 107, 231);
     text-align: center;
+    padding: auto;
   }
+  
+p:hover {
+  letter-spacing: 5px;
+  transition: 1s;
+  text-shadow: 1px 1px 2px rgb(0, 247, 255), 0 0 1em rgb(40, 107, 231), 0 0 0.2em rgb(40, 107, 231);
+}
 
-  iframe {
+iframe {
     display: block;
-    margin: 30px auto 30px;
+    margin: 1% auto 1%;
   }
 
-  .block {
+.block {
     text-align: left;
     display: block;
-    border: 2px solid rgb(40, 107, 231);
+    border: 3px solid rgb(40, 107, 231);
+    border-radius: 15px;
     padding: .5em;
     margin-left: 40%;
     margin-right: 40%;
+  }
+
+  .block:hover {
+    border: 3px solid rgb(0, 0, 0);
+    transition: 2s;
+  }
+
+body {
+    font-family: sans-serif;
   }
