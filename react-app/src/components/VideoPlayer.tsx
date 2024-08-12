@@ -14,6 +14,7 @@ const YoutubePlayerWrapper = ({
   const [timeWatched, setTimeWatched] = useState(0)
   const intervalRef = useRef(null)
   const playerRef = useRef(null)
+  const prevTimeRef = useRef(0) // Use a ref here
 
   const [ready, setReady] = React.useState<boolean>(false)
 
@@ -26,8 +27,8 @@ const YoutubePlayerWrapper = ({
   }, [])
 
   useEffect(() => {
-    const currentTimeWatched = localStorage.getItem('totalTimeWatched') ?? 0
-    const newTimeWatched = Number(currentTimeWatched) + timeWatched
+    const totalTimeWatched = localStorage.getItem('totalTimeWatched') ?? 0
+    const newTimeWatched = Number(totalTimeWatched) + timeWatched
     localStorage.setItem('totalTimeWatched', String(newTimeWatched))
   }, [timeWatched])
 
@@ -49,14 +50,22 @@ const YoutubePlayerWrapper = ({
   const onStateChange = (evt: YouTubeEvent) => {
     console.log('State Change Event:', evt)
     if (evt.data === YouTube.PlayerState.PLAYING && !intervalRef.current) {
-      // @todo clean this up, but not worth it now, not sure if this is how
-      // the mechanism will end up
-
       // @ts-ignore
       intervalRef.current = setInterval(() => {
         // @ts-ignore
-        const currentTime = playerRef.current.getCurrentTime()
-        setTimeWatched(currentTime)
+        const currentTime = playerRef.current?.getCurrentTime()
+        const deltaTime = currentTime - prevTimeRef.current
+
+        console.log('currentTime', currentTime)
+        console.log('prevTime', prevTimeRef.current)
+
+        prevTimeRef.current = currentTime // Update the ref
+        console.log('deltaTime', deltaTime)
+
+        if (deltaTime > 2) {
+          return
+        }
+        setTimeWatched((prevTime) => prevTime + deltaTime)
       }, 1000)
     } else if (
       evt.data !== YouTube.PlayerState.PLAYING &&
@@ -66,7 +75,6 @@ const YoutubePlayerWrapper = ({
       intervalRef.current = null
     }
   }
-
   const onPlaybackRateChange = (evt: YouTubeEvent) => {
     console.log('onReady')
   }
