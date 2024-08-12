@@ -1,3 +1,4 @@
+h1,
 h2,
 p {
     color: rgb(40, 107, 231);
@@ -7,4 +8,13 @@ p {
   iframe {
     display: block;
     margin: 30px auto 30px;
+  }
+
+  .block {
+    text-align: left;
+    display: block;
+    border: 2px solid rgb(40, 107, 231);
+    padding: .5em;
+    margin-left: 40%;
+    margin-right: 40%;
   }
