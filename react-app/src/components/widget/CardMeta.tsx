@@ -11,8 +11,8 @@ import Typography from '@mui/material/Typography'
 import { red } from '@mui/material/colors'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
-import { VideoType } from '../api/dto'
 import { Box, Chip, Grid, LinearProgress } from '@mui/material'
+import { VideoType } from '../../api/dto'
 
 interface ExpandMoreProps extends IconButtonProps {
   expand: boolean

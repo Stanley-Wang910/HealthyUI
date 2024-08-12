@@ -4,13 +4,13 @@ import '../styles/MainFeed.css'
 import { fetchUserVideos } from '../api/api-calls'
 import { VideoType } from '../api/dto'
 import { useQuery } from '@tanstack/react-query'
-import YoutubePlayerWrapper from './VideoPlayer.tsx'
-import { Grid, Modal } from '@mui/material'
+import YoutubePlayerWrapper from './VideoPlayer'
+import { Grid, Modal, Skeleton } from '@mui/material'
 
 const MainFeed = () => {
   const { data, error, isError, isLoading } = useQuery({
     queryKey: ['fetchUserVideos'],
-    queryFn: fetchUserVideos
+    queryFn: () => fetchUserVideos('')
   })
   const [open, setOpen] = React.useState<boolean>(false)
   const [videoId, setVideoId] = React.useState<string>('')
@@ -24,16 +24,31 @@ const MainFeed = () => {
   }
 
   if (isLoading) {
-    console.error('loading')
     // don't block rendering for now but use this pattern in sub components to show
     // render blocking API requests
-    return <div>loading</div>
+    return (
+      <Grid container spacing={2}>
+        {Array.from({ length: 6 }, (_, index) => (
+          <Grid item xs={4}>
+            <Skeleton variant={'rectangular'} height={'241px'} />
+            <Skeleton
+              variant={'rectangular'}
+              height={'20px'}
+              sx={{ marginTop: '20px' }}
+            />
+            <Skeleton
+              variant={'rectangular'}
+              height={'10px'}
+              sx={{ marginTop: '20px' }}
+            />
+          </Grid>
+        ))}
+      </Grid>
+    )
   }
 
   if (isError) {
     console.error('Error fetching data', error)
-    // don't block rendering for now
-    // return <div>Error fetching data</div>;
     return <div>error</div>
   }
 
@@ -94,17 +109,19 @@ const MainFeed = () => {
         {data.map((item: VideoType, index: number) => {
           return (
             <Grid item xs={4}>
-              <VideoBlock
-                key={item.id}
-                id={item.id}
-                videoThumbnail={item.thumbnail}
-                profileThumbnail={item.thumbnail}
-                title={item.title}
-                author={item.author}
-                viewCount={item.views}
-                date={item.date}
-                meta={item.meta}
-              />
+              <div style={{ cursor: 'pointer' }}>
+                <VideoBlock
+                  key={item.id}
+                  id={item.id}
+                  videoThumbnail={item.thumbnail}
+                  profileThumbnail={item.thumbnail}
+                  title={item.title}
+                  author={item.author}
+                  viewCount={item.views}
+                  date={item.date}
+                  meta={item.meta}
+                />
+              </div>
             </Grid>
           )
         })}
