@@ -1,8 +1,7 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import '../styles/Header.css'
 
 import MenuIcon from '@mui/icons-material/Menu'
-import search from '../icons/search.svg'
 import voiceSearchIcon from '../icons/voice-search-icon.svg'
 import upload from '../icons/upload.svg'
 import youtubeApps from '../icons/youtube-apps.svg'
@@ -11,15 +10,19 @@ import MainMenu from './MainMenu'
 import { useQuery } from '@tanstack/react-query'
 import { fetchUserVideos } from '../api/api-calls'
 import { Input } from '@mui/material'
+import SearchIcon from '@mui/icons-material/Search'
+import IconButton from '@mui/material/IconButton'
 
 const Header = () => {
-  const [open, setOpen] = React.useState(false)
+  const [open, setOpen] = useState(false)
   const [input, setInput] = useState('')
 
-  const toggleDrawer = (newOpen: boolean) => () => {
+  const toggleDrawer = (newOpen: boolean) => {
     setOpen(newOpen)
   }
 
+  // react query with the same query key will update the cache automatically
+  // although useful, this is sort of a short circuit
   const { data, error, isLoading, refetch } = useQuery({
     queryKey: ['fetchUserVideos'],
     queryFn: () => fetchUserVideos(input),
@@ -32,12 +35,27 @@ const Header = () => {
     }
   }
 
-  const handleKeyDown = (event: React.KeyboardEvent) => {
+  const handleKeyDown = async (event: React.KeyboardEvent) => {
     if (event.key === 'Enter') {
-      handleSearch()
+      await handleSearch()
     }
   }
 
+  const SearchButton = () => {
+    return (
+      <IconButton onClick={() => handleSearch()}>
+        <SearchIcon />
+      </IconButton>
+    )
+  }
+
+  useEffect(() => {
+    console.log(open)
+  }, [open])
+
+  /*******************************************************
+   *
+   *******************************************************/
   return (
     <>
       <div className="header">
@@ -45,6 +63,7 @@ const Header = () => {
           <MenuIcon
             style={{ cursor: 'pointer' }}
             onClick={() => {
+              console.log('toggle drawer')
               toggleDrawer(true)
             }}
           />
@@ -59,9 +78,7 @@ const Header = () => {
             fullWidth
           />
 
-          <button className="search-button">
-            <img className="search-icon" src={search} alt="Search" />
-          </button>
+          <SearchButton />
 
           <button className="voice-button">
             <img

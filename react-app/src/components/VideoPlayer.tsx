@@ -1,8 +1,8 @@
 import { Box, Skeleton } from '@mui/material'
 import YouTube, { YouTubeEvent } from 'react-youtube'
 import React, { useEffect, useRef, useState } from 'react'
-import CardMeta from './CardMeta'
 import { VideoType } from '../api/dto'
+import CardMeta from "./widget/CardMeta";
 
 const YoutubePlayerWrapper = ({
   id,

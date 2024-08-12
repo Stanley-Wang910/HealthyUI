@@ -20,6 +20,7 @@ def test():
 @app.route('/api/video/get-playlist/<keyword>')
 @app.route('/api/video/get-playlist/', defaults={'keyword': None})
 def get_user_videos_playlist(keyword: str):
+
     if keyword:
         print(f"Keyword provided: {keyword}")
     else:
@@ -49,12 +50,6 @@ def run_factcheck_go():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
-# @app.route('/api/test', methods=['GET'])
-#
-# @app.route('/test')
-# def test():
-#     return jsonify({'message': 'Hello World!'})
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
