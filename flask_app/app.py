@@ -89,7 +89,10 @@ def test_keywords_from_youtube_metadata():
         trk.analyze(text, candidate_pos = ['NOUN', 'PROPN'], window_size=4, lower=False)
         print(f"Keywords for {video_id}:")
         keywords = trk.get_keywords(10)
-
+        keyphrases = trk.yake_phrasing(text)
+        dict_keyphrases = {k[0]: k[1] for k in keyphrases}
+      
+        # How many queries to generate, and how many keywords per query
         query_strings = trk.generate_query_strings(keywords, num_q=3, keywords_per_q=5)
         print("query_strings for video_id:", video_id)
         for q in query_strings:
@@ -98,7 +101,8 @@ def test_keywords_from_youtube_metadata():
 
         json_results[video_id] = {
             "query_strings": query_string,
-            "keywords": keywords
+            "keywords": keywords,
+            "keyphrases": dict_keyphrases
         }          
 
     return jsonify(json_results)

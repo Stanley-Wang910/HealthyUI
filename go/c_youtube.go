@@ -68,8 +68,21 @@ type Default struct {
 type Statistics struct {
 	ViewCount     string `json:"viewCount"`
 	LikeCount     string `json:"likeCount"`
+	DislikeCount  int    `json:"dislikeCount"`
 	FavoriteCount string `json:"favoriteCount"`
 	CommentCount  string `json:"commentCount"`
+}
+
+type DislikeAPI struct {
+	ID          string  `json:"id"`
+	DateCreated string  `json:"dateCreated"`
+	Likes       int     `json:"likes"`
+	RawDislikes int     `json:"rawDislikes"`
+	RawLikes    int     `json:"rawLikes"`
+	Dislikes    int     `json:"dislikes"`
+	Rating      float64 `json:"rating"`
+	ViewCount   int     `json:"viewCount"`
+	Deleted     bool    `json:"deleted"`
 }
 
 type TopicDetails struct {
@@ -136,40 +149,107 @@ type RelTranscript struct {
 func youtubeGET(id string, googleApiKey string) (YoutubeAPIRes, error) {
 	// assign struct obj for GET response
 	var youtubeResponse YoutubeAPIRes
+	var dislikeResponse DislikeAPI
 
-	req, err := http.NewRequest("GET", "https://www.googleapis.com/youtube/v3/videos", nil)
+	var wg sync.WaitGroup
 
-	if err != nil {
-		return youtubeResponse, fmt.Errorf("error with GET youtube request: %v", err)
+	errChan := make(chan error, 2) // Error channel to collect errs from 2 goroutines
+
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		req, err := http.NewRequest("GET", "https://www.googleapis.com/youtube/v3/videos", nil)
+
+		if err != nil {
+			errChan <- fmt.Errorf("error with GET youtube request: %v", err)
+			return // Collect 1 / 2 errors
+		}
+
+		q := req.URL.Query()
+		// Add query parameters here or pass them in
+		q.Add("id", id)
+		q.Add("key", googleApiKey)
+		q.Add("part", "topicDetails,snippet,statistics")
+
+		// {"key1": ["value1"], "key2": ["value2"]}, calling Encode will produce the string key1=value1&key2=value2
+		req.URL.RawQuery = q.Encode()
+
+		req.Header.Add("Accept", "application/json")
+
+		client := &http.Client{}
+		res, err := client.Do(req)
+		if err != nil {
+			errChan <- fmt.Errorf("failed to execute HTTP request for ID: %s: %v", id, err)
+			return // Collect 1 / 2 errors
+		}
+
+		defer res.Body.Close()
+
+		body, err := io.ReadAll(res.Body)
+		if err != nil {
+			errChan <- fmt.Errorf("failed to read response body for ID: %s: %v", id, err)
+			return // Collect 1 / 2 errors
+		}
+
+		err = json.Unmarshal(body, &youtubeResponse)
+		if err != nil {
+			errChan <- fmt.Errorf("failed to unmarshal JSON response for ID: %s: %v", id, err)
+			return // Collect 1 / 2 errors
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		req, err := http.NewRequest("GET", "https://returnyoutubedislikeapi.com/votes?", nil)
+
+		if err != nil {
+			errChan <- fmt.Errorf("error with GET youtube dislike request: %v", err)
+			return // Collect 2 / 2 errors
+		}
+		q := req.URL.Query()
+		q.Add("videoId", id)
+
+		req.URL.RawQuery = q.Encode()
+
+		req.Header.Add("Accept", "application/json")
+
+		client := &http.Client{}
+		res, err := client.Do(req)
+		if err != nil {
+			errChan <- fmt.Errorf("failed to execute HTTP request for ID: %s: %v", id, err)
+			return // Collect 2 / 2 errors
+		}
+
+		defer res.Body.Close() // close body after reading
+
+		body, err := io.ReadAll(res.Body)
+		if err != nil {
+			errChan <- fmt.Errorf("failed to read response body for ID: %s: %v", id, err)
+			return // Collect 2 / 2 errors
+		}
+
+		err = json.Unmarshal(body, &dislikeResponse)
+		if err != nil {
+			errChan <- fmt.Errorf("failed to unmarshal JSON response for ID: %s: %v", id, err)
+			return // Collect 2 / 2 errors
+		}
+	}()
+
+	wg.Wait()
+	close(errChan)
+
+	for err := range errChan {
+		if err != nil {
+			return youtubeResponse, err
+		}
 	}
 
-	q := req.URL.Query()
-	// Add query parameters here or pass them in
-	q.Add("id", id)
-	q.Add("key", googleApiKey)
-	q.Add("part", "topicDetails,snippet,statistics")
+	// Append dislikes to youtubeResponse
 
-	// {"key1": ["value1"], "key2": ["value2"]}, calling Encode will produce the string key1=value1&key2=value2
-	req.URL.RawQuery = q.Encode()
-
-	req.Header.Add("Accept", "application/json")
-
-	client := &http.Client{}
-	res, err := client.Do(req)
-	if err != nil {
-		return youtubeResponse, fmt.Errorf("failed to execute HTTP request for ID: %s: %v", id, err)
-	}
-
-	defer res.Body.Close()
-
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		return youtubeResponse, fmt.Errorf("failed to read response body for ID: %s: %v", id, err)
-	}
-
-	err = json.Unmarshal(body, &youtubeResponse)
-	if err != nil {
-		return youtubeResponse, fmt.Errorf("failed to unmarshal JSON response for ID: %s: %v", id, err)
+	if len(youtubeResponse.Items) > 0 {
+		// Convert int to string
+		youtubeResponse.Items[0].Statistics.DislikeCount = dislikeResponse.Dislikes
 	}
 
 	return youtubeResponse, nil
