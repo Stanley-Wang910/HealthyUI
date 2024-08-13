@@ -9,6 +9,7 @@ import json
 import random
 from itertools import islice
 import yake
+import difflib
 
 
 # https://readmedium.com/en/https:/towardsdatascience.com/textrank-for-keyword-extraction-by-python-c0bae21bcec0
@@ -183,3 +184,14 @@ class TextRankKeyword():
 
         return query_strings    
             
+    def closest_keyword2(self, target_keyword, keywords, cutoff=0.45):
+        closest = difflib.get_close_matches(target_keyword, keywords, n = 3, cutoff=cutoff)
+        if len(closest) == 0:
+            print(f"No closest keyword found for {target_keyword}")
+            return None
+        closest_dict = {}
+        similarities = [difflib.SequenceMatcher(None, target_keyword, match).ratio() for match in closest]
+        for c in closest:
+            closest_dict[c] = similarities[closest.index(c)]
+            
+        return closest_dict

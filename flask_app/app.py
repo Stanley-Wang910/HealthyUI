@@ -51,16 +51,16 @@ def get_yt_keywords():
 
 
 # TEST: Get video metadata for a list of videos
-@app.route('/test/yt1')
+@app.route('/test/yt-1')
 def test_youtube_cc():
     with utils.track_memory_usage("TEST: grab youtube metadata"):
-        video_ids = ['Tw9LWetS49k', '_ZTZGz1xusA', 'Nkq_mI2PlM8', 'Cl3izXcp86w'] 
+        video_ids = ['TP9fPxs2fcw'] 
         video_ids = yt_transcript.extract_ids(video_ids)
         res = go_interface.youtube_cc(video_ids)
         return jsonify(res)
 
 # TEST: Get transcripts and most replayed timestamps concurrently for a list of videos
-@app.route('/test/yt2')
+@app.route('/test/yt-2')
 def test_youtube_transcript_most_replayed_cc():
     with utils.track_memory_usage("TEST: grab youtube transcripts and most replayed timestamps"):
         video_ids = ['TP9fPxs2fcw'] 
@@ -69,7 +69,7 @@ def test_youtube_transcript_most_replayed_cc():
         return jsonify(res)
 
 # TEST: Get relevant transcripts for a list of videos concurrently
-@app.route('/test/yt3')
+@app.route('/test/yt-3')
 def test_relevant_transcripts_cc():
     with utils.track_memory_usage("TEST: grab youtube videos relevant transcripts"):
         video_ids = ['_aSZ4AfSVWQ', 'VTB0_SBltDw', '9Q0pU8urstM']
@@ -78,7 +78,7 @@ def test_relevant_transcripts_cc():
         return jsonify(res)
 
 # TEST: Get keywords and keyphrases, query strings from youtube metadata + relevant transcripts
-@app.route('/test/yt4')
+@app.route('/test/yt-4')
 def test_keywords_from_youtube_metadata():
     video_ids = ['p572p-irRaU', 'https://www.youtube.com/watch?v=VHZDxOmRthE', '63EVXf_S4WQ'] 
 
@@ -106,12 +106,61 @@ def test_keywords_from_youtube_metadata():
 
     return jsonify(json_results)
 
+@app.route('/test/yt-5')
+def test_youtube_metadata_keywords():
+    video_ids = ['TP9fPxs2fcw']
+    video_ids = yt_transcript.extract_ids(video_ids)
+    res = go_interface.youtube_cc(video_ids)
+    json_results = {}
+    for video_id in res:
+        description = res[video_id]["items"][0]["snippet"]["description"]
+        trk.analyze(description, candidate_pos = ['NOUN', 'PROPN'], window_size=4, lower=False)
+        keywords = trk.get_keywords(10)
+        print(keywords)
+        keyphrases = trk.yake_phrasing(description)
+        dict_keyphrases = {k[0]: k[1] for k in keyphrases}
 
+        tags = res[video_id]["items"][0]["snippet"]["tags"]
+
+        best_keywords = {}
+        for keyword, score in keywords.items():
+            closest = trk.closest_keyword2(keyword, tags)
+            if closest is None:
+                best_keywords[keyword] = score
+            else:
+                # replace keyword with closest keyword
+                for c, s in closest.items():
+                    best_keywords[c] = score * s
+        
+        # How many queries to generate, and how many keywords per query
+        query_strings = trk.generate_query_strings(best_keywords, num_q=3, keywords_per_q=3)
+        query_strings = list(query_strings)
+
+        json_results[video_id] = {
+            "query_strings": query_strings,
+            "keywords": keywords,
+            "keyphrases": dict_keyphrases,
+            "closest_keywords": best_keywords,
+            }
+        
+
+    return jsonify(json_results)
+        # title = res[video_id]["items"][0]["snippet"]["title"]
+        # desc = res[video_id]["items"][0]["snippet"]["description"]
+        # tags = res[video_id]["items"][0]["snippet"]["tags"] 
+        # statistics = res[video_id]["items"][0]["statistics"]    
+        # topic_details = res[video_id]["items"][0]["topicDetails"]
+    #     json_results[video_id] = {
+    #         "title": title,
+    #         "description": desc
+    # }
+    # return jsonify(json_results)
 
 # TEST: Get related news articles for a list of videos
 @app.route('/test/yt-news')
 def test_youtube_news():
     video_ids = ['TP9fPxs2fcw']
+
 
     transcripts = yt_transcript.get_relevant_transcript(video_ids)
 
@@ -146,7 +195,8 @@ def test_youtube_news():
 
         json_results[video_id] = {
             "query_strings": queries,
-            "headlines": headlines
+            "headlines": headlines,
+            "keywords": keywords   
         }
 
     return jsonify(json_results)
@@ -168,11 +218,6 @@ def test_news_api_cc():
         queries = utils.strings_to_bytes(queries)
         res = go_interface.news_api_cc(queries)
         return jsonify(res)
-
-
-
-
-
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
