@@ -27,7 +27,6 @@ class TextRankKeyword():
     def set_stopwords(self, stopwords=[" ", ","]):  
         """Set stop words"""
         for word in STOP_WORDS.union(set(stopwords)):
-            print("stop word:", word)   
             lexeme = nlp.vocab[word]
             lexeme.is_stop = True
     
@@ -178,25 +177,3 @@ class TextRankKeyword():
 
         return query_strings    
             
-
-
-# start_time = time.time()
-# run = 'news'
-# command = ['-c', run] 
-# sub_command = ['-n', query_string]
-
-# try:
-#     print(command + sub_command)
-#     result = subprocess.run(['./go/go.exe'] + command + sub_command, 
-#                             capture_output=True, text=True, check=True)
-#     print("Go program output:")
-#     print(result.stdout)
-#     if result.stderr:
-#         print("Go program error output:")
-#         print(result.stderr)
-# except subprocess.CalledProcessError as e:
-#     print(f"Error running Go program: {e}")
-#     print("Error output:")
-#     print(e.stderr)
-# except FileNotFoundError:
-#     print("Error: Go executable not found.")

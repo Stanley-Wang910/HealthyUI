@@ -34,3 +34,11 @@ def track_memory_usage(operation):
     memory_diff = after_memory - before_memory
     time_diff = end_time - start_time
     logging.info(f"{operation} memory usage: {memory_diff:.2f} MB in {time_diff:.2f} seconds")
+
+
+def strings_to_bytes(strings):
+    bytes_list = []
+    for i, string in enumerate(strings):
+        bytes = string.encode('utf-8')
+        strings[i] = bytes
+    return strings
