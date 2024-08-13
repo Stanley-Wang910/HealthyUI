@@ -48,6 +48,8 @@ def get_yt_keywords():
     transcript = yt_transcript.get_relevant_transcript([video_id], tolerance_sec=20, option="asc")
     return jsonify(transcript)
 
+
+
 # TEST: Get video metadata for a list of videos
 @app.route('/test/yt1')
 def test_youtube_cc():
@@ -61,7 +63,7 @@ def test_youtube_cc():
 @app.route('/test/yt2')
 def test_youtube_transcript_most_replayed_cc():
     with utils.track_memory_usage("TEST: grab youtube transcripts and most replayed timestamps"):
-        video_ids = ['_aSZ4AfSVWQ'] 
+        video_ids = ['TP9fPxs2fcw'] 
         video_ids = yt_transcript.extract_ids(video_ids)
         res = go_interface.youtube_transcript_most_replayed_cc(video_ids)
         return jsonify(res)
@@ -75,41 +77,79 @@ def test_relevant_transcripts_cc():
         res = go_interface.youtube_relevant_transcript_cc(video_ids)
         return jsonify(res)
 
-# TEST: Get relevant keywords from youtube metadata + relevant transcripts
+# TEST: Get keywords and keyphrases, query strings from youtube metadata + relevant transcripts
 @app.route('/test/yt4')
 def test_keywords_from_youtube_metadata():
-    video_ids = ['p572p-irRaU'] 
+    video_ids = ['p572p-irRaU', 'https://www.youtube.com/watch?v=VHZDxOmRthE', '63EVXf_S4WQ'] 
 
     transcripts = yt_transcript.get_relevant_transcript(video_ids)
 
-    json_results = {}
-    for video_id in transcripts:
-        text = transcripts[video_id]['text']
-        print(text)
-        trk.analyze(text, candidate_pos = ['NOUN', 'PROPN'], window_size=4, lower=False)
-        print(f"Keywords for {video_id}:")
-        keywords = trk.get_keywords(10)
-        keyphrases = trk.yake_phrasing(text)
-        dict_keyphrases = {k[0]: k[1] for k in keyphrases}
-      
-        # How many queries to generate, and how many keywords per query
-        query_strings = trk.generate_query_strings(keywords, num_q=3, keywords_per_q=5)
-        print("query_strings for video_id:", video_id)
-        for q in query_strings:
-            print("Query string:", repr(q)) # print query string in true form
-        query_string = ",".join(str(q) for q in query_strings)
+    with utils.track_memory_usage("TEST: youtube keywords + keyphrases"):
+        json_results = {}
+        for video_id in transcripts:
+            text = transcripts[video_id]['text']
+            trk.analyze(text, candidate_pos = ['NOUN', 'PROPN'], window_size=4, lower=False)
+            keywords = trk.get_keywords(10)
+            keyphrases = trk.yake_phrasing(text)
+            dict_keyphrases = {k[0]: k[1] for k in keyphrases}
+        
+            # How many queries to generate, and how many keywords per query
+            query_strings = trk.generate_query_strings(keywords, num_q=3, keywords_per_q=3)
 
-        json_results[video_id] = {
-            "query_strings": query_string,
-            "keywords": keywords,
-            "keyphrases": dict_keyphrases
-        }          
+            query_strings = list(query_strings)
+
+            json_results[video_id] = {
+                "query_strings": query_strings,
+                "keywords": keywords,
+                "keyphrases": dict_keyphrases
+            }          
 
     return jsonify(json_results)
 
-# TEST: Get keywords and query strings
 
 
+# TEST: Get related news articles for a list of videos
+@app.route('/test/yt-news')
+def test_youtube_news():
+    video_ids = ['TP9fPxs2fcw']
+
+    transcripts = yt_transcript.get_relevant_transcript(video_ids)
+
+    id_query_map = {}
+    for video_id in transcripts:
+        text = transcripts[video_id]['text']
+        trk.analyze(text, candidate_pos = ['NOUN', 'PROPN'], window_size=4, lower=False)
+        keywords = trk.get_keywords(10)
+        keyphrases = trk.yake_phrasing(text)
+        dict_keyphrases = {k[0]: k[1] for k in keyphrases}
+    
+        # How many queries to generate, and how many keywords per query
+        queries = trk.generate_query_strings(keywords, num_q=3, keywords_per_q=3)
+        
+        queries = list(queries)
+
+        
+        id_query_map[video_id] = {
+                "query_strings": queries,
+                "keywords": keywords,
+                "keyphrases": dict_keyphrases
+            }
+
+    json_results = {}
+    for video_id in id_query_map:
+        queries = id_query_map[video_id]["query_strings"]
+
+        queries = utils.strings_to_bytes(queries) 
+        headlines = go_interface.news_api_cc(queries)
+        queries =  utils.bytes_to_strings(queries)
+        
+
+        json_results[video_id] = {
+            "query_strings": queries,
+            "headlines": headlines
+        }
+
+    return jsonify(json_results)
 
 # TEST: Get fact checked results for a list of queries
 @app.route('/test/fc')

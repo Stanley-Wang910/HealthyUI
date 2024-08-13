@@ -42,3 +42,10 @@ def strings_to_bytes(strings):
         bytes = string.encode('utf-8')
         strings[i] = bytes
     return strings
+
+
+def bytes_to_strings(bytes_list):
+    strings = []
+    for i, bytes in enumerate(bytes_list):
+        strings.append(bytes.decode('utf-8'))
+    return strings
