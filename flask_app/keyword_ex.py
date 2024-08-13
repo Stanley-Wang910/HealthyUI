@@ -8,6 +8,8 @@ import subprocess
 import json
 import random
 from itertools import islice
+import yake
+
 
 # https://readmedium.com/en/https:/towardsdatascience.com/textrank-for-keyword-extraction-by-python-c0bae21bcec0
 
@@ -22,8 +24,12 @@ class TextRankKeyword():
         self.steps = 10 # iteration steps
         self.node_weight = None # save keywords and its weight
         self.set_stopwords()
+        self.yake = yake.KeywordExtractor()
 
-    
+    def yake_phrasing(self,text):
+        keyphrases = self.yake.extract_keywords(text)
+        return keyphrases
+
     def set_stopwords(self, stopwords=[" ", ","]):  
         """Set stop words"""
         for word in STOP_WORDS.union(set(stopwords)):
