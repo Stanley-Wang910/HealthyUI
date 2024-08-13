@@ -1,11 +1,11 @@
+from pprint import pprint
 from typing import TypedDict
 from faker import Factory
 
 fake = Factory.create()
 
-from go_interface import youtube_cc 
-
 from dummy_data import video_list
+from go_interface import youtube_cc
 
 youtube_ids = [b'ARPzNBahjEg', b'aAbjtW7ZtmU', b'_ZTZGz1xusA', b'Nkq_mI2PlM8', b'Cl3izXcp86w', b'0w3NtkYRtDM']
 
@@ -31,9 +31,8 @@ class VideoInfo(TypedDict):
 def simplify_youtube_data(data):
     simplified_videos = []
 
-    # Assuming each key in data dictionary is a video ID, and the value is its details
     for video_details in data.values():
-        for item in video_details['items']:  # Accessing the 'items' list which contains video details
+        for item in video_details['APIRes']['items']:
             video_data = {
                 'id': item['id'],
                 'title': item['snippet']['title'],
