@@ -31,7 +31,12 @@ news_api_get_cc.argtypes = [ctypes.POINTER(ctypes.c_char_p), ctypes.c_int, ctype
 news_api_get_cc.restype = ctypes.POINTER(ctypes.c_char)
 
 # Initialize argtypes and restypes for youtube_get_cc
-youtube_get_cc.argtypes = [ctypes.POINTER(ctypes.c_char_p), ctypes.c_int, ctypes.c_char_p]
+youtube_get_cc.argtypes = [
+    ctypes.POINTER(ctypes.c_char_p), 
+    ctypes.c_int,
+    ctypes.c_char_p,
+    ctypes.c_bool
+]
 youtube_get_cc.restype = ctypes.POINTER(ctypes.c_char)
 
 def fact_check_cc(queries):
@@ -60,7 +65,7 @@ def fact_check_cc(queries):
 
             print(f"Allocated memory after freeing: {get_alloc_count()}")
             
-            print(json.dumps(json.loads(result_str), indent=2))
+            return (json.dumps(json.loads(result_str), indent=2))
 
         else:
             print('Error: No result returned from fact check')
@@ -94,7 +99,7 @@ def news_api_cc(news_queries):
 
             print(f"Allocated memory after freeing: {get_alloc_count()}")
             
-            print(json.dumps(json.loads(headlines_str), indent=2))
+            return (json.dumps(json.loads(headlines_str), indent=2))
         else:
             print('Error: No result returned from news API GET')
     except Exception as e:
@@ -102,7 +107,7 @@ def news_api_cc(news_queries):
         print(f"Error type: {type(e)}")
 
 
-def youtube_cc(ids):
+def youtube_cc(ids, most_replayed=False):
     id_array = (ctypes.c_char_p * len(ids))(*ids) 
     google_api_key = os.getenv('GOOGLE_API_KEY')
 
@@ -111,8 +116,10 @@ def youtube_cc(ids):
         
     google_api_key_bytes = google_api_key.encode('utf-8')
 
+    most_replayed = ctypes.c_bool(most_replayed)
+
     try:
-        result = youtube_get_cc(id_array, len(ids), google_api_key_bytes)
+        result = youtube_get_cc(id_array, len(ids), google_api_key_bytes, most_replayed)
         print(f"Allocated memory after youtube: {get_alloc_count()}")
         
         if result:
@@ -125,7 +132,8 @@ def youtube_cc(ids):
                 log_error(f"Exception type: {type(e)}")
 
             print(f"Allocated memory after freeing: {get_alloc_count()}")
-           # print(json.dumps(json.loads(result_str), indent=2))
+           # # return (json.dumps(json.loads(result_str), indent=2))
+            return json.loads(result_str)
             return json.loads(result_str)
         else:
             print('Error: No result returned from youtube GET')
@@ -135,23 +143,11 @@ def youtube_cc(ids):
 
 
 
-fc_queries = [b'JD Vance Couch', b'Global Warming', b'Olympics', b'Ukraine', b'COVID-19', b'Russia', b'Trump', b'Donald Trump']
+# fc_queries = [b'JD Vance Couch', b'Global Warming', b'Olympics', b'Ukraine', b'COVID-19', b'Russia', b'Trump', b'Donald Trump']
 # news_queries = [b'Global Warming', b'COVID-19', b'Olympics']
-youtube_ids = [b'_ZTZGz1xusA', b'Nkq_mI2PlM8', b'Cl3izXcp86w']
+# youtube_ids = [b'UrxkO4DM67M']
 
-# with utils.track_memory_usage("Fact check GET concurrent (single query)"):
-#     for q in fc_queries:
-#         fact_check_cc([q])
 
-with utils.track_memory_usage("Total Time"):
-    # with utils.track_memory_usage("Fact check GET concurrent"):
-    #     fact_check_cc(fc_queries)
-    # with utils.track_memory_usage("News API GET concurrent"):
-    #     news_api_cc(news_queries)
-    with utils.track_memory_usage("Youtube GET concurrent"):
-        youtube_cc(youtube_ids)
-
-print(f"Final allocated memory: {get_alloc_count()}")   
 
 
 
