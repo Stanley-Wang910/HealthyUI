@@ -107,7 +107,9 @@ extern "C" {
 
 extern __declspec(dllexport) char* FactCheckGETConcurrent(char** _queries, int queryCount, char* _googleApiKey);
 extern __declspec(dllexport) char* NewsApiGETConcurrent(char** _queries, int queryCount, char* _newsApiKey);
-extern __declspec(dllexport) char* YoutubeGETConcurrent(char** _ids, int idCount, char* _googleApiKey, _Bool _mostReplayed);
+extern __declspec(dllexport) char* YoutubeGETConcurrent(char** _ids, int idCount, char* _googleApiKey);
+extern __declspec(dllexport) char* YoutubeGETtranscriptMostReplayedCC(char** _ids, int idCount);
+extern __declspec(dllexport) char* YoutubeGETrelevantTranscriptCC(char** _ids, int idCount);
 extern __declspec(dllexport) _Bool FreeResult(char* result);
 extern __declspec(dllexport) int GetAllocCount();
 

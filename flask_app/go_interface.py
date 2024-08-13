@@ -13,6 +13,8 @@ with utils.track_memory_usage("Loading library"):
     fact_check_get_cc = library.FactCheckGETConcurrent
     news_api_get_cc = library.NewsApiGETConcurrent
     youtube_get_cc = library.YoutubeGETConcurrent
+    yt_tr_mr_get_cc = library.YoutubeGETtranscriptMostReplayedCC
+    yt_relevant_transcript_get_cc = library.YoutubeGETrelevantTranscriptCC
 
     free_result = library.FreeResult
     get_alloc_count = library.GetAllocCount 
@@ -35,12 +37,24 @@ youtube_get_cc.argtypes = [
     ctypes.POINTER(ctypes.c_char_p), 
     ctypes.c_int,
     ctypes.c_char_p,
-    ctypes.c_bool
 ]
 youtube_get_cc.restype = ctypes.POINTER(ctypes.c_char)
 
-def fact_check_cc(queries):
+# Initialize argtypes and restypes for yt_tr_mr_get_cc
+yt_tr_mr_get_cc.argtypes = [
+    ctypes.POINTER(ctypes.c_char_p), 
+    ctypes.c_int,
+]
+yt_tr_mr_get_cc.restype = ctypes.POINTER(ctypes.c_char)
 
+# Initialize argtypes and restypes for yt_relevant_transcript_get_cc
+yt_relevant_transcript_get_cc.argtypes = [
+    ctypes.POINTER(ctypes.c_char_p), 
+    ctypes.c_int,
+]
+yt_relevant_transcript_get_cc.restype = ctypes.POINTER(ctypes.c_char)
+
+def fact_check_cc(queries):
     query_array = (ctypes.c_char_p * len(queries))(*queries) 
 
     google_api_key = os.getenv('GOOGLE_API_KEY')
@@ -65,7 +79,7 @@ def fact_check_cc(queries):
 
             print(f"Allocated memory after freeing: {get_alloc_count()}")
             
-            return (json.dumps(json.loads(result_str), indent=2))
+            return json.loads(result_str)
 
         else:
             print('Error: No result returned from fact check')
@@ -75,7 +89,6 @@ def fact_check_cc(queries):
         print(f"Error type: {type(e)}")
 
 def news_api_cc(news_queries):
-
     news_query_array = (ctypes.c_char_p * len(news_queries))(*news_queries)
     news_api_key = os.getenv('NEWS_API_KEY')
     if not news_api_key:
@@ -99,7 +112,7 @@ def news_api_cc(news_queries):
 
             print(f"Allocated memory after freeing: {get_alloc_count()}")
             
-            return (json.dumps(json.loads(headlines_str), indent=2))
+            return json.loads(headlines_str)
         else:
             print('Error: No result returned from news API GET')
     except Exception as e:
@@ -107,7 +120,7 @@ def news_api_cc(news_queries):
         print(f"Error type: {type(e)}")
 
 
-def youtube_cc(ids, most_replayed=False):
+def youtube_cc(ids):
     id_array = (ctypes.c_char_p * len(ids))(*ids) 
     google_api_key = os.getenv('GOOGLE_API_KEY')
 
@@ -116,10 +129,8 @@ def youtube_cc(ids, most_replayed=False):
         
     google_api_key_bytes = google_api_key.encode('utf-8')
 
-    most_replayed = ctypes.c_bool(most_replayed)
-
     try:
-        result = youtube_get_cc(id_array, len(ids), google_api_key_bytes, most_replayed)
+        result = youtube_get_cc(id_array, len(ids), google_api_key_bytes)
         print(f"Allocated memory after youtube: {get_alloc_count()}")
         
         if result:
@@ -132,14 +143,64 @@ def youtube_cc(ids, most_replayed=False):
                 log_error(f"Exception type: {type(e)}")
 
             print(f"Allocated memory after freeing: {get_alloc_count()}")
-           # # return (json.dumps(json.loads(result_str), indent=2))
-            return json.loads(result_str)
             return json.loads(result_str)
         else:
             print('Error: No result returned from youtube GET')
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
         print(f"Error type: {type(e)}")
+
+
+def youtube_transcript_most_replayed_cc(ids):
+    id_array = (ctypes.c_char_p * len(ids))(*ids) 
+    try:
+        result = yt_tr_mr_get_cc(id_array, len(ids))
+
+        print(f"Allocated memory after transcript most replayed: {get_alloc_count()}")
+        
+        if result:
+            result_str = ctypes.cast(result, ctypes.c_char_p).value.decode('utf-8')      
+            try:
+                free_result_success = free_result(result)
+            except Exception as e:
+                log_error(f"Unexpected error in free_result: {e}")
+                log_error(f"Exception type: {type(e)}")
+
+            print(f"Allocated memory after freeing: {get_alloc_count()}")
+           # # return (json.dumps(json.loads(result_str), indent=2))
+            return json.loads(result_str)
+        else:
+            print('Error: No result returned from transcript most replayed GET')
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        print(f"Error type: {type(e)}")
+
+
+def youtube_relevant_transcript_cc(ids):
+    id_array = (ctypes.c_char_p * len(ids))(*ids) 
+    try:
+        result = yt_relevant_transcript_get_cc(id_array, len(ids))
+
+        print(f"Allocated memory after transcript most replayed: {get_alloc_count()}")
+        
+        if result:
+            result_str = ctypes.cast(result, ctypes.c_char_p).value.decode('utf-8')      
+            try:
+                free_result_success = free_result(result)
+            except Exception as e:
+                log_error(f"Unexpected error in free_result: {e}")
+                log_error(f"Exception type: {type(e)}")
+
+            print(f"Allocated memory after freeing: {get_alloc_count()}")
+            return json.loads(result_str)
+        else:
+            print('Error: No result returned from transcript most replayed GET')
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        print(f"Error type: {type(e)}")
+
+
+    
 
 
 

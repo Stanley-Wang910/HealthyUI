@@ -35,7 +35,7 @@ def get_peak_rewatched_timestamps(result_json, video_id):
     # top_timestamps_minutes = [marker['startMillis'] / 1000 / 60 for marker in top_markers]
     return top_timestamps_seconds
 
-def get_transcript(video_id, timestamps):
+def get_transcript(video_id):
     transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
     # print("timestamps:", timestamps)    
     # print(transcript_list)
@@ -45,24 +45,24 @@ def get_transcript(video_id, timestamps):
         if transcript_manual is not None:
             print("manual transcript found")
             # print(transcript_manual.fetch())
-            if timestamps is not None:
-                transcript_manual = transcript_manual.fetch()
-                return (transcript_manual, "manual") # with timestamps
-            else:
-                transcript_manual = transcript_manual.translate(['en, en-US']).fetch()[0]['text']
-                return (transcript_manual, "manual") # without timestamps
+            # if timestamps is not None:
+            transcript_manual = transcript_manual.fetch()
+            transcript_manual = clean_transcript(transcript_manual)
+            return (transcript_manual, "manual") # with timestamps
+            # else:
+            #     transcript_manual = transcript_manual.translate(['en, en-US']).fetch()[0]['text']
+            #     return (transcript_manual, "manual") # without timestamps
     except Exception as e:
         print("No manual transcript found")
         try:
             transcript_auto = transcript_list.find_generated_transcript(['en', 'en-US'])
             if transcript_auto is not None:
                 print("auto transcript found")
-                if timestamps is not None:
-                    return (transcript_auto.fetch(), "auto") # with timestamps
-                else:
-                    transcript_auto = transcript_auto.translate('en').fetch()[0]['text']
-                    return (transcript_auto, "auto") # without timestamps
-
+                # if timestamps is not None:
+                return (transcript_auto.fetch(), "auto") # with timestamps
+                # else:
+                #     transcript_auto = transcript_auto.translate('en').fetch()[0]['text']
+                #     return (transcript_auto, "auto") # without timestamps
         except Exception as e:
             print("No auto transcript found")
 
@@ -78,6 +78,10 @@ def clean_transcript(transcript):
         # Remove extra spaces
         entry['text'] = re.sub(r'\s+', ' ', entry['text']).strip()
     return transcript
+
+def concatenate_transcript(transcript):
+    concatenated_transcript = ''.join([entry['text'] for entry in transcript])
+    return concatenated_transcript
 
 
 def find_close_entries(timestamps, transcript, tolerance_sec=20):
@@ -141,24 +145,16 @@ def sort_entries(entries, timestamps, option="asc"):
     return relevant_transcript
 
 def get_relevant_transcript(video_ids, tolerance_sec=20, option="asc"):
-    # Splice link
-    video_id_map = {}
-    for i, video_id in enumerate(video_ids):
-        if "/" in video_id:
-            video_id = video_id.split("?v=")[-1].split("&t=")[0] if "&t=" in video_id else video_id.split("?v=")[-1]
-            print(f"video_id: {video_id}")
+    # Splice link, Convert to bytes for C functions
+    video_ids = extract_ids(video_ids)
 
-        byte_id = video_id.encode('utf-8')
-        video_id_map[video_id] = byte_id
-        # replace in-place
-        video_ids[i] = byte_id
-
-    print(video_id_map)
-    res = go_interface.youtube_cc(video_ids, most_replayed=True)
+    res = go_interface.youtube_transcript_most_replayed_cc(video_ids)
 
     transcript_list = {}
-    for video_id, byte_id in video_id_map.items():
-        if res[video_id]['MostReplayed'] is not None:
+    for byte_id in video_ids: 
+        video_id = byte_id.decode('utf-8')
+        timestamps = None
+        if res[video_id]["MostReplayed"]["items"][0]["mostReplayed"]["markers"] is not None:
             try:
                 timestamps = get_peak_rewatched_timestamps(res, video_id)
                 print(timestamps)
@@ -166,29 +162,30 @@ def get_relevant_transcript(video_ids, tolerance_sec=20, option="asc"):
                 print("No peak rewatched timestamps found")
                 timestamps = None
 
-        with utils.track_memory_usage("get_transcript"):
-            transcript, source = get_transcript(video_id, timestamps)
-
-            if source == "manual":
-                transcript = clean_transcript(transcript)
-        
         if timestamps is not None:
-            entries = find_close_entries(timestamps, transcript, tolerance_sec=tolerance_sec) # Default returns ascending
+            entries = find_close_entries(timestamps, res[video_id]["Transcript"]["transcript"], tolerance_sec=tolerance_sec) # Default returns ascending
             relevant_transcript = sort_entries(entries, timestamps)
             transcript_list[video_id] = {
                 "text": relevant_transcript,
-                "source": source
+                "source": res[video_id]["Transcript"]["source"]
             }
         else:
+            # no timestamps to compare, concatenate transcipt
+            concatenated_transcript = concatenate_transcript(res[video_id]["Transcript"]["transcript"])
             transcript_list[video_id] = {
-                "text": transcript,
-                "source": source
+                "text": concatenated_transcript,
+                "source": res[video_id]["Transcript"]["source"]
             }
-            
 
     return transcript_list
 
-# transcript = get_transcript(video_id)
-# print(transcript)
-# # t = get_transcript(video_id)
-# # print(t[0]['text'])
+def extract_ids(video_ids):
+    for i, video_id in enumerate(video_ids):
+        if "/" in video_id:
+            video_id = video_id.split("?v=")[-1].split("&t=")[0] if "&t=" in video_id else video_id.split("?v=")[-1]
+            print(f"video_id: {video_id}")
+
+        byte_id = video_id.encode('utf-8')
+        # replace in-place
+        video_ids[i] = byte_id
+    return video_ids

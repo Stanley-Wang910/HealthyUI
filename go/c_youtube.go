@@ -15,11 +15,6 @@ import (
 // #include <stdlib.h>
 import "C"
 
-type CombinedYoutubeRes struct {
-	APIRes       YoutubeAPIRes
-	MostReplayed *YoutubeMostReplayedRes // nil if not requested
-}
-
 type YoutubeAPIRes struct {
 	// Kind     string   `json:"kind"`
 	// Etag     string   `json:"etag"`
@@ -37,14 +32,14 @@ type Item struct {
 }
 
 type Snippet struct {
-	PublishedAt string `json:"publishedAt"`
-	ChannelID   string `json:"channelId"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	// Thumbnails           Thumbnails `json:"thumbnails"`
-	ChannelTitle string   `json:"channelTitle"`
-	Tags         []string `json:"tags"`
-	CategoryID   string   `json:"categoryId"`
+	PublishedAt  string     `json:"publishedAt"`
+	ChannelID    string     `json:"channelId"`
+	Title        string     `json:"title"`
+	Description  string     `json:"description"`
+	Thumbnails   Thumbnails `json:"thumbnails"`
+	ChannelTitle string     `json:"channelTitle"`
+	Tags         []string   `json:"tags"`
+	CategoryID   string     `json:"categoryId"`
 	// LiveBroadcastContent string     `json:"liveBroadcastContent"`
 	// DefaultLanguage      string     `json:"defaultLanguage"`
 	// Localized            Localized  `json:"localized"`
@@ -114,6 +109,30 @@ type Marker struct {
 // 	VisibleTimeRangeEndMillis   int64 `json:"visibleTimeRangeEndMillis"`
 // }
 
+type TranscriptRes struct {
+	Source     string       `json:"source"`
+	Transcript []Transcript `json:"transcript"`
+}
+
+type Transcript struct {
+	Duration float64 `json:"duration"`
+	Start    float64 `json:"start"`
+	Text     string  `json:"text"`
+}
+
+type CombinedDataRes struct {
+	Transcript   TranscriptRes
+	MostReplayed YoutubeMostReplayedRes
+}
+
+// String key is video ID
+type RelevantTranscriptRes map[string]RelTranscript
+
+type RelTranscript struct {
+	Source string `json:"source"`
+	Text   string `json:"text"`
+}
+
 func youtubeGET(id string, googleApiKey string) (YoutubeAPIRes, error) {
 	// assign struct obj for GET response
 	var youtubeResponse YoutubeAPIRes
@@ -156,6 +175,63 @@ func youtubeGET(id string, googleApiKey string) (YoutubeAPIRes, error) {
 	return youtubeResponse, nil
 }
 
+//export YoutubeGETConcurrent
+func YoutubeGETConcurrent(_ids **C.char, idCount C.int, _googleApiKey *C.char) *C.char {
+	ids := CStrArrayToSlice(_ids, idCount)
+
+	googleApiKey := C.GoString(_googleApiKey)
+	if googleApiKey == "" {
+		return C.CString("Error: GOOGLE_API_KEY is empty")
+	}
+
+	var wg sync.WaitGroup
+
+	videos := make(chan struct {
+		id    string
+		err   error
+		video YoutubeAPIRes
+	}, len(ids))
+
+	for _, id := range ids {
+		wg.Add(1)
+		go func(id string) {
+			defer wg.Done()
+			video, err := youtubeGET(id, googleApiKey)
+
+			videos <- struct {
+				id    string
+				err   error
+				video YoutubeAPIRes
+			}{id, err, video}
+		}(id)
+	}
+
+	go func() {
+		// Wait for concurrent goroutines to finish
+		wg.Wait()
+		close(videos)
+	}()
+
+	allVideos := make(map[string]YoutubeAPIRes)
+
+	for v := range videos {
+		if v.err != nil {
+			fmt.Printf("error for id: %s : %v\n", v.id, v.err)
+		} else {
+			allVideos[v.id] = v.video
+		}
+	}
+
+	jsonOutput, err := json.MarshalIndent(allVideos, "", " ")
+	if err != nil {
+		return C.CString(fmt.Sprintf("error marshaling JSON: %v", err))
+	}
+
+	atomic.AddInt32(&allocCount, 1)
+	return C.CString(string(jsonOutput))
+
+}
+
 func youtubeGETmostReplayed(id string) (YoutubeMostReplayedRes, error) {
 	var youtubeMRRes YoutubeMostReplayedRes
 
@@ -192,56 +268,79 @@ func youtubeGETmostReplayed(id string) (YoutubeMostReplayedRes, error) {
 	return youtubeMRRes, nil
 }
 
-//export YoutubeGETConcurrent
-func YoutubeGETConcurrent(_ids **C.char, idCount C.int, _googleApiKey *C.char, _mostReplayed C.bool) *C.char {
-	ids := CStrArrayToSlice(_ids, idCount)
+func youtubeGETtranscript(id string) (TranscriptRes, error) {
+	var transcriptResponse TranscriptRes
+	// Subject to change with domain / port
+	req, err := http.NewRequest("GET", "http://localhost:5000/yt/transcript", nil)
 
-	googleApiKey := C.GoString(_googleApiKey)
-	if googleApiKey == "" {
-		return C.CString("Error: GOOGLE_API_KEY is empty")
+	if err != nil {
+		return transcriptResponse, fmt.Errorf("error with GET youtube transcript request: %v", err)
+	}
+	q := req.URL.Query()
+	q.Add("id", id)
+
+	req.URL.RawQuery = q.Encode()
+
+	req.Header.Add("Accept", "application/json")
+
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return transcriptResponse, fmt.Errorf("failed to execute HTTP request for ID: %s: %v", id, err)
 	}
 
-	mostReplayed := _mostReplayed != C.bool(false)
+	defer res.Body.Close()
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return transcriptResponse, fmt.Errorf("failed to read response body for ID: %s: %v", id, err)
+	}
+
+	// fmt.Print(string(body))
+
+	err = json.Unmarshal(body, &transcriptResponse)
+	if err != nil {
+		return transcriptResponse, fmt.Errorf("failed to unmarshal JSON response for ID: %s: %v", id, err)
+	}
+
+	return transcriptResponse, nil
+}
+
+//export YoutubeGETtranscriptMostReplayedCC
+func YoutubeGETtranscriptMostReplayedCC(_ids **C.char, idCount C.int) *C.char {
+	ids := CStrArrayToSlice(_ids, idCount)
 
 	var wg sync.WaitGroup
 
-	results := make(chan struct {
-		id     string
-		err    error
-		result CombinedYoutubeRes
+	combinedRes := make(chan struct {
+		id       string
+		err      error
+		combined CombinedDataRes
 	}, len(ids))
 
 	for _, id := range ids {
 		wg.Add(1)
 		go func(id string) {
 			defer wg.Done()
-			var combinedRes CombinedYoutubeRes
+			var combined CombinedDataRes
 			var err1, err2 error
 
-			// Run both API calls in parallel
-
+			// Run Transcript and Most Replayed in Parallel
 			var innerWg sync.WaitGroup
-			innerWg.Add(1)
+			innerWg.Add(2)
 
 			go func() {
 				defer innerWg.Done()
-				combinedRes.APIRes, err1 = youtubeGET(id, googleApiKey)
+				combined.Transcript, err1 = youtubeGETtranscript(id)
 			}()
 
-			if mostReplayed {
-				innerWg.Add(1)
-				go func() {
-					defer innerWg.Done()
-					var mrRes YoutubeMostReplayedRes
-					mrRes, err2 = youtubeGETmostReplayed(id)
-					combinedRes.MostReplayed = &mrRes
-				}()
-			}
+			go func() {
+				defer innerWg.Done()
+				combined.MostReplayed, err2 = youtubeGETmostReplayed(id)
+			}()
 
 			innerWg.Wait()
 
-			// Combine any errors
-
+			// Combine errors
 			var err error
 			if err1 != nil {
 				err = err1
@@ -250,40 +349,126 @@ func YoutubeGETConcurrent(_ids **C.char, idCount C.int, _googleApiKey *C.char, _
 				if err == nil {
 					err = err2
 				} else {
-					err = fmt.Errorf("%v\n%v", err, err2)
+					err = fmt.Errorf("%v; %v", err, err2)
 				}
 			}
 
-			results <- struct {
-				id     string
-				err    error
-				result CombinedYoutubeRes
-			}{id, err, combinedRes}
+			// Pass into channel
+			combinedRes <- struct {
+				id       string
+				err      error
+				combined CombinedDataRes
+			}{id, err, combined}
+		}(id)
+	}
+
+	go func() {
+		wg.Wait()
+		close(combinedRes)
+	}()
+
+	allResults := make(map[string]CombinedDataRes)
+
+	for c := range combinedRes {
+		if c.err != nil {
+			fmt.Printf("Error for id: %s : %v\n", c.id, c.err)
+		}
+		allResults[c.id] = c.combined
+	}
+
+	jsonOutput, err := json.MarshalIndent(allResults, "", " ")
+	if err != nil {
+		return C.CString(fmt.Sprintf("error marshalling JSON: %v", err))
+	}
+
+	atomic.AddInt32(&allocCount, 1)
+	return C.CString(string(jsonOutput))
+}
+
+func youtubeGETrelevantTranscript(id string) (RelevantTranscriptRes, error) {
+	var relevantTranscript RelevantTranscriptRes
+
+	req, err := http.NewRequest("GET", "http://localhost:5000/yt/relevant-transcript", nil)
+
+	if err != nil {
+		return relevantTranscript, fmt.Errorf("error with GET youtube rel transcript request: %v", err)
+	}
+	q := req.URL.Query()
+	q.Add("id", id)
+
+	req.URL.RawQuery = q.Encode()
+
+	req.Header.Add("Accept", "application/json")
+
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return relevantTranscript, fmt.Errorf("failed to execute HTTP request for ID: %s: %v", id, err)
+	}
+
+	defer res.Body.Close()
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return relevantTranscript, fmt.Errorf("failed to read response body for ID: %s: %v", id, err)
+	}
+
+	// fmt.Print(string(body))
+
+	err = json.Unmarshal(body, &relevantTranscript)
+	if err != nil {
+		return relevantTranscript, fmt.Errorf("failed to unmarshal JSON response for ID: %s: %v", id, err)
+	}
+
+	return relevantTranscript, nil
+}
+
+//export YoutubeGETrelevantTranscriptCC
+func YoutubeGETrelevantTranscriptCC(_ids **C.char, idCount C.int) *C.char {
+	ids := CStrArrayToSlice(_ids, idCount)
+
+	var wg sync.WaitGroup
+
+	relevantTranscripts := make(chan struct {
+		id                 string
+		err                error
+		relevantTranscript RelevantTranscriptRes
+	}, len(ids))
+
+	for _, id := range ids {
+		wg.Add(1)
+		go func(id string) {
+			defer wg.Done()
+
+			relevantTranscript, err := youtubeGETrelevantTranscript(id)
+
+			relevantTranscripts <- struct {
+				id                 string
+				err                error
+				relevantTranscript RelevantTranscriptRes
+			}{id, err, relevantTranscript}
 		}(id)
 	}
 
 	go func() {
 		// Wait for concurrent goroutines to finish
 		wg.Wait()
-		close(results)
+		close(relevantTranscripts)
 	}()
 
-	allResults := make(map[string]CombinedYoutubeRes)
+	allRelTranscripts := make(map[string]RelevantTranscriptRes)
 
-	for res := range results {
-		if res.err != nil {
-			fmt.Printf("error for id: %s : %v\n", res.id, res.err)
-		} else {
-			allResults[res.id] = res.result
+	for r := range relevantTranscripts {
+		if r.err != nil {
+			fmt.Printf("error for id: %s : %v\n", r.id, r.err)
 		}
+		allRelTranscripts[r.id] = r.relevantTranscript
 	}
 
-	jsonOutput, err := json.MarshalIndent(allResults, "", " ")
+	jsonOutput, err := json.MarshalIndent(allRelTranscripts, "", " ")
 	if err != nil {
 		return C.CString(fmt.Sprintf("error marshaling JSON: %v", err))
 	}
 
 	atomic.AddInt32(&allocCount, 1)
 	return C.CString(string(jsonOutput))
-
 }

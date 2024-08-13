@@ -1,14 +1,7 @@
 package main
 
-import (
-	"fmt"
-	"log"
-
-	"time"
-	"unsafe"
-
-	"github.com/joho/godotenv"
-)
+// "time"
+// "unsafe"
 
 // #include <stdbool.h>
 // #include <stdint.h>
@@ -16,45 +9,51 @@ import (
 // #include <stdlib.h>
 import "C"
 
+// import "fmt"
+
 // Test Locally
 
 func main() {
-	queries := []string{"Ukraine"}
-	queryCount := len(queries)
+	// queries := []string{"Tw9LWetS49k", "_ZTZGz1xusA", "Nkq_mI2PlM8", "Cl3izXcp86w"}
+	// queryCount := len(queries)
 
-	// Convert Go strings to C strings
-	cQueries := make([]*C.char, queryCount)
-	for i, q := range queries {
-		cQueries[i] = C.CString(q)
-	}
-	defer func() {
-		for _, cStr := range cQueries {
-			C.free(unsafe.Pointer(cStr))
-		}
-	}()
+	// // Convert Go strings to C strings
+	// cQueries := make([]*C.char, queryCount)
+	// for i, q := range queries {
+	// 	cQueries[i] = C.CString(q)
+	// }
+	// defer func() {
+	// 	for _, cStr := range cQueries {
+	// 		C.free(unsafe.Pointer(cStr))
+	// 	}
+	// }()
 
-	// Convert the slice of C string pointers to a C-compatible format
-	cQueriesPtr := (**C.char)(unsafe.Pointer(&cQueries[0]))
+	// // Convert the slice of C string pointers to a C-compatible format
+	// cQueriesPtr := (**C.char)(unsafe.Pointer(&cQueries[0]))
 
-	errEnv := godotenv.Load()
-	if errEnv != nil {
-		log.Fatalf("Error loading .env file: %v", errEnv)
-	}
+	// // errEnv := godotenv.Load()
+	// // if errEnv != nil {
+	// // 	log.Fatalf("Error loading .env file: %v", errEnv)
+	// // }
 
-	apiKey := ""
+	// // apiKey := ""
 
-	cApiKey := C.CString(apiKey)
-	defer C.free(unsafe.Pointer(cApiKey))
+	// // cApiKey := C.CString(apiKey)
+	// // defer C.free(unsafe.Pointer(cApiKey))
 
-	startTime := time.Now()
-	result := FactCheckGETConcurrent(cQueriesPtr, C.int(queryCount), cApiKey)
-	defer C.free(unsafe.Pointer(result))
+	// startTime := time.Now()
+	// result := youtubeGETtranscriptConcurrent(cQueriesPtr, C.int(queryCount))
+	// defer C.free(unsafe.Pointer(result))
 
-	// Convert the result back to a Go string
-	goResult := C.GoString(result)
+	// // Convert the result back to a Go string
+	// goResult := C.GoString(result)
 
-	fmt.Println("Result:", goResult)
-	fmt.Println("Result took", time.Since(startTime))
+	// id := "ioqSvLqB46Y"
+	// result, err := youtubeGETrelevantTranscript(id)
+	// if err != nil {
+	// 	fmt.Println("Whoopsies")
+	// }
+	// fmt.Println("Result:", result)
 
 }
 
