@@ -152,6 +152,7 @@ def youtube_cc(ids):
 
 
 def youtube_transcript_most_replayed_cc(ids):
+    print(f"in youtube_transcript_most_replayed_cc", ids)
     id_array = (ctypes.c_char_p * len(ids))(*ids) 
     try:
         result = yt_tr_mr_get_cc(id_array, len(ids))
