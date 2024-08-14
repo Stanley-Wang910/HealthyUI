@@ -6,13 +6,17 @@ import CardMeta from './widget/CardMeta'
 
 
 type VideoItem = VideoType[string]['items'][0]
+type FactCheckData = any
 
 const YoutubePlayerWrapper = ({
   id,
-  meta
+  meta,
+  // factcheckData
 }: {
   id: string
-  meta?: VideoItem | null
+  meta?: VideoItem | null,
+  // factCheckData?: any;
+
 }) => {
   const [timeWatched, setTimeWatched] = useState(0)
   const intervalRef = useRef(null)

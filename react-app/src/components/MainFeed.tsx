@@ -6,6 +6,7 @@ import { VideoType } from '../api/dto'
 import { useQuery } from '@tanstack/react-query'
 import YoutubePlayerWrapper from './VideoPlayer'
 import { Grid, Modal, Skeleton } from '@mui/material'
+import { fetchNewsFactCheck } from '../api/api-calls'
 
 
 
@@ -20,14 +21,24 @@ const MainFeed = () => {
 
   });
     
+ 
+
   const [open, setOpen] = React.useState<boolean>(false)
   const [videoId, setVideoId] = React.useState<string>('')
   const [meta, setVideoMeta] = React.useState<VideoType[string]['items'][0] | null>(null)
+
+  const { data: factCheckData, refetch: refetchFactCheck } = useQuery({
+    queryKey: ['fetchNewsFactCheck', videoId],
+    queryFn: () => fetchNewsFactCheck(meta),
+    enabled: false, // This query won't run automatically
+  });
+
 
   const handleOpen = (id: string, videoMeta: VideoType[string]['items'][0]) => {
     setVideoId(id)
     setVideoMeta(videoMeta)
     setOpen(true)
+    refetchFactCheck()
   }
   const handleClose = () => {
     setOpen(false)

@@ -22,3 +22,8 @@ export const fetchUserVideos = async (videoIds: string | string[] = []) => {
   console.log(data)
   return data;
 };
+
+export const fetchNewsFactCheck = async (videoMeta: any) => {
+  const { data } = await axios.post(`${apiHost}/yt/fc`, videoMeta);
+  return data;
+};

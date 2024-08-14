@@ -9,6 +9,7 @@ import yt_transcript
 import keyword_ex
 from services import user_videos
 from utils import assert_video_ids
+import threading
 
 trk = keyword_ex.TextRankKeyword()
 
@@ -171,8 +172,7 @@ def youtube_blob_keywords(video_ids=None):
         trk.analyze(blob, candidate_pos = ['NOUN', 'PROPN'], window_size=4, lower=False)
         keywords = trk.get_keywords(10)
         print(keywords)
-        keyphrases = trk.yake_phrasing(blob)
-        dict_keyphrases = {k[0]: k[1] for k in keyphrases[:5]} # limit to 5 keyphrases
+        
 
         tags = vid_data[video_id]["items"][0]["snippet"]["tags"]
 
@@ -188,6 +188,9 @@ def youtube_blob_keywords(video_ids=None):
                     for c, s in closest.items():
                         best_keywords[c] = score * s
                 if closest is None:
+                    # No similar keywords between tags and TextRank keywords
+                    keyphrases = trk.yake_phrasing(blob)
+                    dict_keyphrases = {k[0]: k[1] for k in keyphrases[:5]} # limit to 5 keyphrases
                     for keyphrase, score in dict_keyphrases.items():
                         closest = trk.closest_keyword2(keyphrase, tags)
                         if closest is None:
@@ -198,7 +201,7 @@ def youtube_blob_keywords(video_ids=None):
                                 best_keywords[c] = score * s
             
         # How many queries to generate, and how many keywords per query
-        query_strings = trk.generate_query_strings(best_keywords, num_q=10, keywords_per_q=3)
+        query_strings = trk.generate_query_strings(best_keywords, num_q=5, keywords_per_q=2)
         query_strings = list(query_strings)
 
         json_results[video_id] = {
@@ -243,10 +246,11 @@ def youtube_news(video_ids=None):
 # ROUTE: Get fact checked related articles for a list of videos
 @app.route('/yt/fc', methods=['GET'])
 def youtube_fc(video_ids=None):
-    video_ids = request.args.get('ids')
-    video_ids, err, code = utils.assert_video_ids(video_ids)
-    if err:
-        return err, code
+    if video_ids is None:
+        video_ids = request.args.get('ids')
+        video_ids, err, code = utils.assert_video_ids(video_ids)
+        if err:
+            return err, code
 
     res = youtube_blob_keywords(video_ids)
 
@@ -268,10 +272,11 @@ def youtube_fc(video_ids=None):
 # ROUTE: Get fc and news related articles for a list of videos
 @app.route('/yt/fc-news', methods=['GET'])
 def youtube_fc_news(video_ids=None):
-    video_ids = request.args.get('ids')
-    video_ids, err, code = utils.assert_video_ids(video_ids)
-    if err:
-        return err, code
+    if video_ids is None:
+        video_ids = request.args.get('ids')
+        video_ids, err, code = utils.assert_video_ids(video_ids)
+        if err:
+            return err, code
 
     res = youtube_blob_keywords(video_ids)
 

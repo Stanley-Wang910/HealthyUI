@@ -51,3 +51,8 @@ export type VideoType = {
     }>;
   };
 }
+
+
+export type NewsFactCheckType = {
+  [videoId: string]: {
+    items: Array<{
