@@ -39,9 +39,9 @@ def simplify_youtube_data(data):
                 'thumbnail': item['snippet']['thumbnails']['high']['url'],
                 'channel_thumbnail': '',  # Placeholder, as this information isn't available directly
                 'author': item['snippet']['channelTitle'],
-                'views': item['statistics']['viewCount'],
                 'date': item['snippet']['publishedAt'],
-                'meta': {
+                'youtubeStatistics': item['statistics'],
+                'huiMeta': {
                     'title': fake.text(max_nb_chars=20),
                     'spectrum_calc':  fake.random_int(min=0, max=10) / 10,
                     'placeholder': fake.text(max_nb_chars=100),

@@ -6,6 +6,11 @@ import { VideoType } from '../api/dto'
 import { useQuery } from '@tanstack/react-query'
 import YoutubePlayerWrapper from './VideoPlayer'
 import { Grid, Modal, Skeleton } from '@mui/material'
+import ThumbUpIcon from '@mui/icons-material/ThumbUp'
+import ThumbDownIcon from '@mui/icons-material/ThumbDown'
+import CommentIcon from '@mui/icons-material/Comment'
+import VisibilityIcon from '@mui/icons-material/Visibility'
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 
 const MainFeed = () => {
   const { data, error, isError, isLoading } = useQuery({
@@ -14,7 +19,7 @@ const MainFeed = () => {
   })
   const [open, setOpen] = React.useState<boolean>(false)
   const [videoId, setVideoId] = React.useState<string>('')
-  const [meta, setVideoMeta] = React.useState<VideoType['meta']>()
+  const [meta, setVideoMeta] = React.useState<VideoType['huiMeta']>()
 
   const handleOpen = () => {
     setOpen(true)
@@ -58,18 +63,18 @@ const MainFeed = () => {
     profileThumbnail,
     title,
     author,
-    viewCount,
     date,
-    meta
+    stats,
+    huiMeta
   }: {
     id: string
     videoThumbnail: string
     profileThumbnail: string
     title: string
     author: string
-    viewCount: string
     date: string
-    meta: VideoType['meta']
+    stats: VideoType['youtubeStatistics']
+    huiMeta: VideoType['huiMeta']
   }) => {
     return (
       <div
@@ -95,7 +100,94 @@ const MainFeed = () => {
             <p className="author">{author}</p>
 
             <p className="stats">
-              {viewCount} &middot; {date}
+              <Grid
+                container
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+                sx={{
+                  alignItems: 'center'
+                }}
+              >
+                <Grid
+                  item
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}
+                >
+                  <CommentIcon
+                    sx={{
+                      paddingRight: '10px'
+                    }}
+                  />
+                  {stats.commentCount}
+                </Grid>
+                <Grid
+                  item
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}
+                >
+                  <CalendarMonthIcon
+                    sx={{
+                      paddingRight: '10px'
+                    }}
+                  />
+                  {date}
+                </Grid>
+              </Grid>
+              <Grid
+                container
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+                sx={{
+                  alignItems: 'center'
+                }}
+              >
+                <Grid
+                  item
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}
+                >
+                  <VisibilityIcon
+                    sx={{
+                      paddingRight: '10px'
+                    }}
+                  />
+                  {stats.viewCount}
+                </Grid>
+
+                <Grid
+                  item
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}
+                >
+                  <ThumbUpIcon
+                    sx={{
+                      paddingRight: '10px'
+                    }}
+                  />
+                  {stats.likeCount}
+                  <span
+                    style={{
+                      paddingRight: '10px'
+                    }}
+                  />
+                  <ThumbDownIcon
+                    sx={{
+                      paddingRight: '10px'
+                    }}
+                  />
+                  {stats.dislikeCount}
+                </Grid>
+              </Grid>
             </p>
           </div>
         </div>
@@ -117,9 +209,9 @@ const MainFeed = () => {
                   profileThumbnail={item.thumbnail}
                   title={item.title}
                   author={item.author}
-                  viewCount={item.views}
                   date={item.date}
-                  meta={item.meta}
+                  huiMeta={item.huiMeta} // this is probably too much props drilling
+                  stats={item.youtubeStatistics} // this is probably too much props drilling
                 />
               </div>
             </Grid>

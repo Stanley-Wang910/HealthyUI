@@ -29,7 +29,7 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
   })
 }))
 
-const CardMeta = ({ meta }: { meta: VideoType['meta'] }) => {
+const CardMeta = ({ meta }: { meta: VideoType['huiMeta'] }) => {
   const [expanded, setExpanded] = React.useState(false)
 
   const handleExpandClick = () => {

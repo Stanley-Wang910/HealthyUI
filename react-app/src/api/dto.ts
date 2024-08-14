@@ -4,9 +4,15 @@ export type VideoType = {
   thumbnail: string
   'channel-thumbnail': string
   author: string
-  views: string
   date: string
-  meta: {
+  youtubeStatistics: {
+    commentCount: string
+    dislikeCount: number
+    favoriteCount: string
+    likeCount: string
+    viewCount: string
+  }
+  huiMeta: {
     spectrum_calc: number
     title: string
     placeholder: string

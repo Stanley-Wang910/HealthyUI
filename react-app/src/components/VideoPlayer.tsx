@@ -9,7 +9,7 @@ const YoutubePlayerWrapper = ({
   meta
 }: {
   id: string
-  meta?: VideoType['meta']
+  meta?: VideoType['huiMeta']
 }) => {
   const [timeWatched, setTimeWatched] = useState(0)
   const intervalRef = useRef(null)
