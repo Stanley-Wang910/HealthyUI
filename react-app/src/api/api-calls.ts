@@ -12,10 +12,19 @@ export const fetchTestData = async () => {
   return data
 }
 
-export const fetchUserVideos = async (keyword?: string) => {
-  const encoded = keyword ? encodeURI(keyword) : ''
+export const fetchUserVideos = async (videoIds: string | string[] = []) => {
+  const ids = Array.isArray(videoIds) ? videoIds : [videoIds];
+  const encodedIds = encodeURIComponent(ids.join(','));
+  const url = `${apiHost}/yt/video?ids=${encodedIds}`
+  console.log(url)
   const { data } = await axios.get(
-    `${apiHost}/api/video/get-playlist/${encoded}`
-  )
-  return data
-}
+    `${apiHost}/yt/video?ids=${encodedIds}`
+  );
+  console.log(data)
+  return data;
+};
+
+export const fetchNewsFactCheck = async (videoMeta: any) => {
+  const { data } = await axios.post(`${apiHost}/yt/fc`, videoMeta);
+  return data;
+};

@@ -4,12 +4,20 @@ import React, { useEffect, useRef, useState } from 'react'
 import { VideoType } from '../api/dto'
 import CardMeta from './widget/CardMeta'
 
+
+// type VideoItem = VideoType[string]['items'][0]
+// type FactCheckData = any
+
 const YoutubePlayerWrapper = ({
   id,
-  meta
+  meta,
+  // factcheckData
 }: {
   id: string
   meta?: VideoType['huiMeta']
+  // meta?: VideoItem | null,
+  // factCheckData?: any;
+
 }) => {
   const [timeWatched, setTimeWatched] = useState(0)
   const intervalRef = useRef(null)
@@ -79,8 +87,6 @@ const YoutubePlayerWrapper = ({
     console.log('onReady')
   }
 
-  console.log(meta)
-  console.log(ready)
   return (
     <>
       {!ready && (

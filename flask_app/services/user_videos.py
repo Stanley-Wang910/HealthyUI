@@ -31,8 +31,8 @@ class VideoInfo(TypedDict):
 def simplify_youtube_data(data):
     simplified_videos = []
 
-    for video_details in data.values():
-        for item in video_details['items']:
+    for video_id in data.values():
+        for item in video_id['items']:
             video_data = {
                 'id': item['id'],
                 'title': item['snippet']['title'],

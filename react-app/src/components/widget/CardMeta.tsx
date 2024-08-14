@@ -29,12 +29,17 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
   })
 }))
 
+// type VideoItem = VideoType[string]['items'][0]
+
 const CardMeta = ({ meta }: { meta: VideoType['huiMeta'] }) => {
   const [expanded, setExpanded] = React.useState(false)
 
   const handleExpandClick = () => {
     setExpanded(!expanded)
   }
+
+  const spectrumCalc = 0.5; // Replace with actual value if available
+  const placeholder = "Placeholder text";
 
   return (
     <Card>

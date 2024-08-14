@@ -12,8 +12,23 @@ import CommentIcon from '@mui/icons-material/Comment'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import VideoOpenContext from '../context/context'
+import { fetchNewsFactCheck } from '../api/api-calls'
 
 const MainFeed = () => {
+
+    //
+    // @stanleys work
+    // const ids = ['d7cit3N5awE', 'OwgMv4YLU0k', 'E6bVBH9y5O8', 'M1u1ECx_Nlw', 'udiEkZSvS5E', 'AxHcShn_HvM', 'eYcpXamLmWg', 'LvXwXKjIP0A'];
+    // const { data, error, isError, isLoading } = useQuery<VideoType>({
+    //     queryKey: ['fetchUserVideos'],
+    //     queryFn: () => {
+    //         console.log('Calling fetchUserVideos with ids:', ids);
+    //         return fetchUserVideos(ids)
+    //     },
+    //
+    // });
+
+
   const { data, error, isError, isLoading } = useQuery({
     queryKey: ['fetchUserVideos'],
     queryFn: () => fetchUserVideos('')
@@ -27,6 +42,13 @@ const MainFeed = () => {
     setOpen(true)
     updateValue(true)
   }
+
+    // const handleOpen = (id: string, videoMeta: VideoType[string]['items'][0]) => {
+    //     setVideoId(id)
+    //     setVideoMeta(videoMeta)
+    //     setOpen(true)
+    //     refetchFactCheck()
+    // }
 
   const handleClose = () => {
     setOpen(false)
@@ -68,7 +90,8 @@ const MainFeed = () => {
     author,
     date,
     stats,
-    huiMeta
+    huiMeta,
+    onClick
   }: {
     id: string
     videoThumbnail: string
@@ -78,15 +101,23 @@ const MainFeed = () => {
     date: string
     stats: VideoType['youtubeStatistics']
     huiMeta: VideoType['huiMeta']
+      // meta: VideoType[string]['items'][0]
+      // onClick: () => void
+    onClick: () => void
   }) => {
     return (
       <div
         className="preview"
+        style={{ cursor: 'pointer' }}
+
         onClick={() => {
           setVideoId(id)
           setVideoMeta(huiMeta)
           handleOpen()
         }}
+        // onClick={() => {
+        //     onClick()
+        // }}
       >
         <div className="thumbnail-row">
           <img className="thumbnail" src={videoThumbnail} alt="thumbnail" />
@@ -198,9 +229,47 @@ const MainFeed = () => {
     )
   }
 
+    // return (
+    //     <>
+    //         <Grid container spacing={3} className='px-4'>
+    //             {data && Object.entries(data).length > 0 ? (
+    //                 Object.entries(data).map(([videoId, videoData]) => {
+    //                     const item = videoData.items[0];
+    //                     return (
+    //                         <Grid item xs={12} sm={6} md={3} key={videoId} >
+    //                             <VideoBlock
+    //                                 id={videoId}
+    //                                 videoThumbnail={item.snippet.thumbnails.medium.url}
+    //                                 profileThumbnail={item.snippet.thumbnails.default.url}
+    //                                 title={item.snippet.title}
+    //                                 author={item.snippet.channelTitle}
+    //                                 viewCount={item.statistics.viewCount}
+    //                                 date={new Date(item.snippet.publishedAt).toLocaleDateString()}
+    //                                 meta={item}
+    //                                 onClick={() => {
+    //                                     handleOpen(videoId, item)
+    //                                 }}
+    //                             />
+    //                         </Grid>
+    //                     );
+    //                 })
+
+
+    if(!data.lenth) {
+        <Grid container spacing={3} className='px-4'>
+
+                <Grid item xs={12}>
+                    <p>No videos available.</p>
+                </Grid>
+        </Grid>
+
+    }
+
+
   return (
     <>
       <Grid container spacing={2}>
+
         {data.map((item: VideoType, index: number) => {
           return (
             <Grid item xs={4}>
@@ -216,11 +285,11 @@ const MainFeed = () => {
                   huiMeta={item.huiMeta} // this is probably too much props drilling
                   stats={item.youtubeStatistics} // this is probably too much props drilling
                 />
-              </div>
             </Grid>
-          )
+      )
         })}
-      </Grid>
+
+    </Grid>
 
       <Modal
         open={open}
