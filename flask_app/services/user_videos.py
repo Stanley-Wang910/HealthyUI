@@ -32,7 +32,7 @@ def simplify_youtube_data(data):
     simplified_videos = []
 
     for video_details in data.values():
-        for item in video_details['APIRes']['items']:
+        for item in video_details['items']:
             video_data = {
                 'id': item['id'],
                 'title': item['snippet']['title'],
