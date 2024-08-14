@@ -29,12 +29,17 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
   })
 }))
 
-const CardMeta = ({ meta }: { meta: VideoType['meta'] }) => {
+type VideoItem = VideoType[string]['items'][0]
+
+const CardMeta = ({ meta }: { meta: VideoItem }) => {
   const [expanded, setExpanded] = React.useState(false)
 
   const handleExpandClick = () => {
     setExpanded(!expanded)
   }
+
+  const spectrumCalc = 0.5; // Replace with actual value if available
+  const placeholder = "Placeholder text";
 
   return (
     <Card>
@@ -49,13 +54,13 @@ const CardMeta = ({ meta }: { meta: VideoType['meta'] }) => {
             <MoreVertIcon />
           </IconButton>
         }
-        title={meta.title}
+        title={meta.snippet.title}
         subheader="This is a static subhead about our video meta"
       />
 
       <CardContent>
         <Typography variant="body2" color="text.secondary">
-          {meta.placeholder}
+          {placeholder}
         </Typography>
         <Box
           sx={{
@@ -69,7 +74,7 @@ const CardMeta = ({ meta }: { meta: VideoType['meta'] }) => {
             <Grid item xs={8}>
               <LinearProgress
                 variant="determinate"
-                value={meta.spectrum_calc * 100}
+                value={spectrumCalc * 100}
               />
             </Grid>
             <Grid item xs={2}>
@@ -91,7 +96,7 @@ const CardMeta = ({ meta }: { meta: VideoType['meta'] }) => {
       </CardActions>
       <Collapse in={expanded} timeout="auto" unmountOnExit>
         <CardContent>
-          <Typography paragraph> {meta.description} </Typography>
+          <Typography paragraph> {meta.snippet.description} </Typography>
         </CardContent>
       </Collapse>
     </Card>

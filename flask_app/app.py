@@ -10,8 +10,6 @@ import keyword_ex
 from services import user_videos
 from utils import assert_video_ids
 
-
-
 trk = keyword_ex.TextRankKeyword()
 
 app = Flask(__name__)
@@ -35,6 +33,7 @@ def get_user_videos_playlist(keyword: str):
 # ROUTE: Go calls this concurrently to return transcripts for a list of videos
 @app.route('/yt/transcript', methods=['GET'])
 def get_yt_transcript():
+
     video_id = request.args.get('id')
     if not video_id:
         return jsonify({'error': 'Missing video_id parameter'}), 400

@@ -7,16 +7,26 @@ import { useQuery } from '@tanstack/react-query'
 import YoutubePlayerWrapper from './VideoPlayer'
 import { Grid, Modal, Skeleton } from '@mui/material'
 
+
+
 const MainFeed = () => {
-  const { data, error, isError, isLoading } = useQuery({
+  const ids = ['d7cit3N5awE', 'OwgMv4YLU0k', 'E6bVBH9y5O8', 'M1u1ECx_Nlw', 'udiEkZSvS5E', 'AxHcShn_HvM', 'eYcpXamLmWg', 'LvXwXKjIP0A'];
+  const { data, error, isError, isLoading } = useQuery<VideoType>({
     queryKey: ['fetchUserVideos'],
-    queryFn: () => fetchUserVideos('')
-  })
+    queryFn: () => {
+      console.log('Calling fetchUserVideos with ids:', ids);
+      return fetchUserVideos(ids)
+    },
+
+  });
+    
   const [open, setOpen] = React.useState<boolean>(false)
   const [videoId, setVideoId] = React.useState<string>('')
-  const [meta, setVideoMeta] = React.useState<VideoType['meta']>()
+  const [meta, setVideoMeta] = React.useState<VideoType[string]['items'][0] | null>(null)
 
-  const handleOpen = () => {
+  const handleOpen = (id: string, videoMeta: VideoType[string]['items'][0]) => {
+    setVideoId(id)
+    setVideoMeta(videoMeta)
     setOpen(true)
   }
   const handleClose = () => {
@@ -60,7 +70,8 @@ const MainFeed = () => {
     author,
     viewCount,
     date,
-    meta
+    meta,
+    onClick
   }: {
     id: string
     videoThumbnail: string
@@ -69,15 +80,16 @@ const MainFeed = () => {
     author: string
     viewCount: string
     date: string
-    meta: VideoType['meta']
+    meta: VideoType[string]['items'][0]
+    onClick: () => void
   }) => {
     return (
       <div
         className="preview"
+        style={{ cursor: 'pointer' }}
+
         onClick={() => {
-          setVideoId(id)
-          setVideoMeta(meta)
-          setOpen(true)
+          onClick()
         }}
       >
         <div className="thumbnail-row">
@@ -103,29 +115,36 @@ const MainFeed = () => {
     )
   }
 
-  return (
-    <>
-      <Grid container spacing={2}>
-        {data.map((item: VideoType, index: number) => {
+return (
+  <>
+    <Grid container spacing={3} className='px-4'> 
+      {data && Object.entries(data).length > 0 ? (
+        Object.entries(data).map(([videoId, videoData]) => {
+          const item = videoData.items[0];
           return (
-            <Grid item xs={4}>
-              <div style={{ cursor: 'pointer' }}>
-                <VideoBlock
-                  key={item.id}
-                  id={item.id}
-                  videoThumbnail={item.thumbnail}
-                  profileThumbnail={item.thumbnail}
-                  title={item.title}
-                  author={item.author}
-                  viewCount={item.views}
-                  date={item.date}
-                  meta={item.meta}
+            <Grid item xs={12} sm={6} md={3} key={videoId} >
+              <VideoBlock
+                id={videoId}  
+                videoThumbnail={item.snippet.thumbnails.medium.url}
+                profileThumbnail={item.snippet.thumbnails.default.url}
+                title={item.snippet.title}
+                author={item.snippet.channelTitle}
+                viewCount={item.statistics.viewCount}
+                date={new Date(item.snippet.publishedAt).toLocaleDateString()}
+                meta={item}
+                onClick={() => {
+                  handleOpen(videoId, item)
+                }}
                 />
-              </div>
             </Grid>
-          )
-        })}
-      </Grid>
+        );
+      })
+      ) : (
+        <Grid item xs={12}>
+          <p>No videos available.</p>
+        </Grid>
+      )}
+    </Grid>
 
       <Modal
         open={open}

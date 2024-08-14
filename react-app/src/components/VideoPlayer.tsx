@@ -4,12 +4,15 @@ import React, { useEffect, useRef, useState } from 'react'
 import { VideoType } from '../api/dto'
 import CardMeta from './widget/CardMeta'
 
+
+type VideoItem = VideoType[string]['items'][0]
+
 const YoutubePlayerWrapper = ({
   id,
   meta
 }: {
   id: string
-  meta?: VideoType['meta']
+  meta?: VideoItem | null
 }) => {
   const [timeWatched, setTimeWatched] = useState(0)
   const intervalRef = useRef(null)
