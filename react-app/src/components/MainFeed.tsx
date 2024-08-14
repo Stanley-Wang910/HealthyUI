@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useContext, useState } from 'react'
 import '../styles/MainFeed.css'
 
 import { fetchUserVideos } from '../api/api-calls'
@@ -11,26 +11,29 @@ import ThumbDownIcon from '@mui/icons-material/ThumbDown'
 import CommentIcon from '@mui/icons-material/Comment'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
+import VideoOpenContext from '../context/context'
 
 const MainFeed = () => {
   const { data, error, isError, isLoading } = useQuery({
     queryKey: ['fetchUserVideos'],
     queryFn: () => fetchUserVideos('')
   })
-  const [open, setOpen] = React.useState<boolean>(false)
-  const [videoId, setVideoId] = React.useState<string>('')
-  const [meta, setVideoMeta] = React.useState<VideoType['huiMeta']>()
+  const [open, setOpen] = useState<boolean>(false)
+  const [videoId, setVideoId] = useState<string>('')
+  const [meta, setVideoMeta] = useState<VideoType['huiMeta']>()
+  const { value, updateValue } = useContext(VideoOpenContext)
 
   const handleOpen = () => {
     setOpen(true)
+    updateValue(true)
   }
+
   const handleClose = () => {
     setOpen(false)
+    updateValue(false)
   }
 
   if (isLoading) {
-    // don't block rendering for now but use this pattern in sub components to show
-    // render blocking API requests
     return (
       <Grid container spacing={2}>
         {Array.from({ length: 6 }, (_, index) => (
@@ -81,8 +84,8 @@ const MainFeed = () => {
         className="preview"
         onClick={() => {
           setVideoId(id)
-          setVideoMeta(meta)
-          setOpen(true)
+          setVideoMeta(huiMeta)
+          handleOpen()
         }}
       >
         <div className="thumbnail-row">

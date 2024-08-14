@@ -56,7 +56,7 @@ const YoutubePlayerWrapper = ({
         const currentTime = playerRef.current?.getCurrentTime()
         const deltaTime = currentTime - prevTimeRef.current
 
-        // quick fix for if user if skipping around on the video, 2 is arbitrary number
+        // quick fix for if user is skipping around on the video, 2 is arbitrary number
         // this mechanism could be cleaner
         prevTimeRef.current = currentTime
         if (deltaTime > 2) {
@@ -79,6 +79,8 @@ const YoutubePlayerWrapper = ({
     console.log('onReady')
   }
 
+  console.log(meta)
+  console.log(ready)
   return (
     <>
       {!ready && (
@@ -93,7 +95,12 @@ const YoutubePlayerWrapper = ({
       )}
 
       <Box
-        sx={{ opacity: ready ? 1 : 0, position: ready ? 'auto' : 'absolute' }}
+        sx={{
+          maxWidth: '650px',
+          textAlign: 'center',
+          opacity: ready ? 1 : 0,
+          position: ready ? 'auto' : 'absolute'
+        }}
       >
         <YouTube
           videoId={id}
