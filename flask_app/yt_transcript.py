@@ -156,13 +156,24 @@ def sort_entries(entries, timestamps, option="asc"):
 
 def get_relevant_transcript(video_ids, tolerance_sec=20, option="asc"):
     # Splice link, Convert to bytes for C functions
-    video_ids = extract_ids(video_ids)
 
     res = go_interface.youtube_transcript_most_replayed_cc(video_ids)
+
+    print(res)
+   
 
     transcript_list = {}
     for byte_id in video_ids: 
         video_id = byte_id.decode('utf-8')
+
+        # Handle case where transcript is empty
+        if res[video_id]["Transcript"]["transcript"] == None:
+            transcript_list[video_id] = {
+                "text": None,
+                "source": None
+            }
+            continue
+
         timestamps = None
         if res[video_id]["MostReplayed"]["items"][0]["mostReplayed"]["markers"] is not None:
             try:

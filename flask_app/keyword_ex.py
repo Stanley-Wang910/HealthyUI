@@ -171,7 +171,7 @@ class TextRankKeyword():
         query_strings = []
         keyword_items = list(keywords.items())
         for q in range(num_q):
-            chosen_keywords = random.sample(keyword_items, keywords_per_q) # random.sample foruniqueness
+            chosen_keywords = random.sample(keyword_items, keywords_per_q) # random.sample for uniqueness
 
             # Reorder based on original keywords order
             chosen_keywords.sort(key=lambda x: x[1], reverse=True)
@@ -189,6 +189,8 @@ class TextRankKeyword():
         if len(closest) == 0:
             print(f"No closest keyword found for {target_keyword}")
             return None
+        else:
+            print(f"Closest keywords for {target_keyword}: {closest}")
         closest_dict = {}
         similarities = [difflib.SequenceMatcher(None, target_keyword, match).ratio() for match in closest]
         for c in closest:

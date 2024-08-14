@@ -18,8 +18,9 @@ import "C"
 type YoutubeAPIRes struct {
 	// Kind     string   `json:"kind"`
 	// Etag     string   `json:"etag"`
-	Items []Item `json:"items"`
+	Items []Item `json:"items,omitempty"`
 	// PageInfo PageInfo `json:"pageInfo"`
+	Error string `json:"error,omitempty"`
 }
 
 type Item struct {
@@ -296,7 +297,7 @@ func YoutubeGETConcurrent(_ids **C.char, idCount C.int, _googleApiKey *C.char) *
 
 	for v := range videos {
 		if v.err != nil {
-			fmt.Printf("error for id: %s : %v\n", v.id, v.err)
+			allVideos[v.id] = YoutubeAPIRes{Error: v.err.Error()}
 		} else {
 			allVideos[v.id] = v.video
 		}

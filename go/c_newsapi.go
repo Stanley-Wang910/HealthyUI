@@ -18,6 +18,8 @@ import "C"
 type NewsAPIResponse struct {
 	Query        string `json:"query"`
 	Status       string `json:"status"`
+	Code         string `json:"code,omitempty"`
+	Message      string `json:"message,omitempty"`
 	TotalResults int    `json:"totalResults"`
 	Articles     []struct {
 		Source struct {

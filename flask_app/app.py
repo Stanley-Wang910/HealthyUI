@@ -8,6 +8,7 @@ import utils
 import yt_transcript  
 import keyword_ex
 from services import user_videos
+from utils import assert_video_ids
 
 
 
@@ -19,6 +20,9 @@ app = Flask(__name__)
 # the supports credentials option is bugging sometimes
 CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
+
+
+
 
 
 @app.route('/api/video/get-playlist/<keyword>')
@@ -45,49 +49,85 @@ def get_yt_keywords():
     if not video_id:
         return jsonify({'error': 'Missing video_id parameter'}), 400
     
-    transcript = yt_transcript.get_relevant_transcript([video_id], tolerance_sec=20, option="asc")
+    video_id = yt_transcript.extract_ids([video_id])
+
+    transcript = yt_transcript.get_relevant_transcript(video_id, tolerance_sec=20, option="asc")
     return jsonify(transcript)
 
 
 
 # TEST: Get video metadata for a list of videos
-@app.route('/test/yt-1')
-def test_youtube_cc():
+@app.route('/yt/video', methods=['GET'])
+def youtube_metadata_cc(video_ids=None):
+    if video_ids is None:
+        video_ids = request.args.get('ids')
+        video_ids, err, code = utils.assert_video_ids(video_ids)
+        if err:
+            return err, code
+
     with utils.track_memory_usage("TEST: grab youtube metadata"):
-        video_ids = ['TP9fPxs2fcw'] 
         video_ids = yt_transcript.extract_ids(video_ids)
         res = go_interface.youtube_cc(video_ids)
         return jsonify(res)
 
 # TEST: Get transcripts and most replayed timestamps concurrently for a list of videos
-@app.route('/test/yt-2')
-def test_youtube_transcript_most_replayed_cc():
+@app.route('/yt/tr-mr', methods=['GET'])
+def youtube_transcript_most_replayed_cc(video_ids=None):   
+    if video_ids is None:
+        video_ids = request.args.get('ids')
+        video_ids, err, code = utils.assert_video_ids(video_ids)
+        if err:
+            return err, code
+
     with utils.track_memory_usage("TEST: grab youtube transcripts and most replayed timestamps"):
-        video_ids = ['TP9fPxs2fcw'] 
         video_ids = yt_transcript.extract_ids(video_ids)
         res = go_interface.youtube_transcript_most_replayed_cc(video_ids)
         return jsonify(res)
 
-# TEST: Get relevant transcripts for a list of videos concurrently
-@app.route('/test/yt-3')
-def test_relevant_transcripts_cc():
+# TEST: Get relevant transcripts and most rewatched timestamps for a list of videos concurrently
+@app.route('/yt/rtr', methods=['GET'])
+def youtube_relevant_transcript_cc(video_ids=None):
+    if video_ids is None:
+        video_ids = request.args.get('ids')
+        video_ids, err, code = utils.assert_video_ids(video_ids)
+        if err:
+            return err, code
+
     with utils.track_memory_usage("TEST: grab youtube videos relevant transcripts"):
-        video_ids = ['_aSZ4AfSVWQ', 'VTB0_SBltDw', '9Q0pU8urstM']
         video_ids = yt_transcript.extract_ids(video_ids)
         res = go_interface.youtube_relevant_transcript_cc(video_ids)
         return jsonify(res)
 
 # TEST: Get keywords and keyphrases, query strings from youtube metadata + relevant transcripts
-@app.route('/test/yt-4')
-def test_keywords_from_youtube_metadata():
-    video_ids = ['p572p-irRaU', 'https://www.youtube.com/watch?v=VHZDxOmRthE', '63EVXf_S4WQ'] 
+@app.route('/yt/tr-kw', methods=['GET'])
+def youtube_transcript_keywords(video_ids=None):
+    if video_ids is None:
+        video_ids = request.args.get('ids')
+        video_ids, err, code = utils.assert_video_ids(video_ids)
+        if err:
+            return err, code
+    
+    video_ids = yt_transcript.extract_ids(video_ids)
 
     transcripts = yt_transcript.get_relevant_transcript(video_ids)
+
+    if transcripts == {}:
+        return jsonify({'error': 'No transcripts found'})
+
 
     with utils.track_memory_usage("TEST: youtube keywords + keyphrases"):
         json_results = {}
         for video_id in transcripts:
             text = transcripts[video_id]['text']
+
+            if text is None:
+                json_results[video_id] = {
+                    "query_strings": [],
+                    "keywords": [],
+                    "keyphrases": []
+                }
+                continue
+            
             trk.analyze(text, candidate_pos = ['NOUN', 'PROPN'], window_size=4, lower=False)
             keywords = trk.get_keywords(10)
             keyphrases = trk.yake_phrasing(text)
@@ -106,87 +146,95 @@ def test_keywords_from_youtube_metadata():
 
     return jsonify(json_results)
 
-@app.route('/test/yt-5')
-def test_youtube_metadata_keywords():
-    video_ids = ['TP9fPxs2fcw']
+
+# TEST: Get best combination of keywords from youtube metadata + relevant transcripts 
+@app.route('/yt/b-kw', methods=['GET'])
+def youtube_blob_keywords(video_ids=None):
+    if video_ids is None:
+        video_ids = request.args.get('ids')
+        video_ids, err, code = utils.assert_video_ids(video_ids)
+        if err:
+            return err, code
+
+
     video_ids = yt_transcript.extract_ids(video_ids)
-    res = go_interface.youtube_cc(video_ids)
+    with utils.track_memory_usage("TEST: youtube blob 1"):
+        vid_data = go_interface.youtube_cc(video_ids)
+    with utils.track_memory_usage("TEST: youtube blob 2"):
+        transcripts = yt_transcript.get_relevant_transcript(video_ids)
+    
+
     json_results = {}
-    for video_id in res:
-        description = res[video_id]["items"][0]["snippet"]["description"]
-        trk.analyze(description, candidate_pos = ['NOUN', 'PROPN'], window_size=4, lower=False)
-        keywords = trk.get_keywords(10)
-        print(keywords)
-        keyphrases = trk.yake_phrasing(description)
-        dict_keyphrases = {k[0]: k[1] for k in keyphrases}
-
-        tags = res[video_id]["items"][0]["snippet"]["tags"]
-
-        best_keywords = {}
-        for keyword, score in keywords.items():
-            closest = trk.closest_keyword2(keyword, tags)
-            if closest is None:
-                best_keywords[keyword] = score
+    with utils.track_memory_usage("TEST: youtube blob 3"):
+        for video_id in vid_data:
+            title = vid_data[video_id]["items"][0]["snippet"]["title"]
+            description = vid_data[video_id]["items"][0]["snippet"]["description"]
+            if transcripts[video_id]['text'] is not None:
+                transcript = transcripts[video_id]['text']
+                blob = title + description + transcript
+                t_used = True
             else:
-                # replace keyword with closest keyword
-                for c, s in closest.items():
-                    best_keywords[c] = score * s
-        
-        # How many queries to generate, and how many keywords per query
-        query_strings = trk.generate_query_strings(best_keywords, num_q=3, keywords_per_q=3)
-        query_strings = list(query_strings)
+                blob = title + description
+                t_used = False
 
-        json_results[video_id] = {
-            "query_strings": query_strings,
-            "keywords": keywords,
-            "keyphrases": dict_keyphrases,
-            "closest_keywords": best_keywords,
-            }
-        
+            trk.analyze(blob, candidate_pos = ['NOUN', 'PROPN'], window_size=4, lower=False)
+            keywords = trk.get_keywords(10)
+            print(keywords)
+            keyphrases = trk.yake_phrasing(blob)
+            dict_keyphrases = {k[0]: k[1] for k in keyphrases[:5]} # limit to 5 keyphrases
 
-    return jsonify(json_results)
-        # title = res[video_id]["items"][0]["snippet"]["title"]
-        # desc = res[video_id]["items"][0]["snippet"]["description"]
-        # tags = res[video_id]["items"][0]["snippet"]["tags"] 
-        # statistics = res[video_id]["items"][0]["statistics"]    
-        # topic_details = res[video_id]["items"][0]["topicDetails"]
-    #     json_results[video_id] = {
-    #         "title": title,
-    #         "description": desc
-    # }
-    # return jsonify(json_results)
+            tags = vid_data[video_id]["items"][0]["snippet"]["tags"]
+
+            if tags is not None:
+                best_keywords = {}
+    
+                for keyword, score in keywords.items():
+                    closest = trk.closest_keyword2(keyword, tags)
+                    if closest is None:
+                        best_keywords[keyword] = score
+                    else:
+                        # replace keyword with closest keyword
+                        for c, s in closest.items():
+                            best_keywords[c] = score * s
+                    if closest is None:
+                        for keyphrase, score in dict_keyphrases.items():
+                            closest = trk.closest_keyword2(keyphrase, tags)
+                            if closest is None:
+                                best_keywords[keyphrase] = score
+                            else:
+                                # replace keyword with closest keyword
+                                for c, s in closest.items():
+                                    best_keywords[c] = score * s
+                
+            # How many queries to generate, and how many keywords per query
+            query_strings = trk.generate_query_strings(best_keywords, num_q=10, keywords_per_q=3)
+            query_strings = list(query_strings)
+
+            json_results[video_id] = {
+                "query_strings": query_strings,
+                "keyphrases": dict_keyphrases,
+                "best_keywords": best_keywords,
+                "tags": tags,
+                "keywords": keywords, 
+                "transcript_used": t_used
+                }
+
+    return json_results
+
 
 # TEST: Get related news articles for a list of videos
-@app.route('/test/yt-news')
-def test_youtube_news():
-    video_ids = ['TP9fPxs2fcw']
+@app.route('/yt/news', methods=['GET'])
+def youtube_news(video_ids=None):
+    video_ids = request.args.get('ids')
+    video_ids, err, code = utils.assert_video_ids(video_ids)
+    if err:
+        return err, code
 
-
-    transcripts = yt_transcript.get_relevant_transcript(video_ids)
-
-    id_query_map = {}
-    for video_id in transcripts:
-        text = transcripts[video_id]['text']
-        trk.analyze(text, candidate_pos = ['NOUN', 'PROPN'], window_size=4, lower=False)
-        keywords = trk.get_keywords(10)
-        keyphrases = trk.yake_phrasing(text)
-        dict_keyphrases = {k[0]: k[1] for k in keyphrases}
-    
-        # How many queries to generate, and how many keywords per query
-        queries = trk.generate_query_strings(keywords, num_q=3, keywords_per_q=3)
-        
-        queries = list(queries)
-
-        
-        id_query_map[video_id] = {
-                "query_strings": queries,
-                "keywords": keywords,
-                "keyphrases": dict_keyphrases
-            }
+    res = youtube_blob_keywords(video_ids)
 
     json_results = {}
-    for video_id in id_query_map:
-        queries = id_query_map[video_id]["query_strings"]
+    for video_id in res:
+        queries = res[video_id]["query_strings"]
 
         queries = utils.strings_to_bytes(queries) 
         headlines = go_interface.news_api_cc(queries)
@@ -196,25 +244,88 @@ def test_youtube_news():
         json_results[video_id] = {
             "query_strings": queries,
             "headlines": headlines,
-            "keywords": keywords   
         }
 
     return jsonify(json_results)
 
+
+# TEST: Get fact checked related articles for a list of videos
+@app.route('/yt/fc', methods=['GET'])
+def youtube_fc(video_ids=None):
+    video_ids = request.args.get('ids')
+    video_ids, err, code = utils.assert_video_ids(video_ids)
+    if err:
+        return err, code
+
+    res = youtube_blob_keywords(video_ids)
+
+    json_results = {}
+    for video_id in res:
+        queries = res[video_id]["query_strings"]
+
+        queries = utils.strings_to_bytes(queries) 
+        fact_checks = go_interface.fact_check_cc(queries)
+        queries =  utils.bytes_to_strings(queries)
+        
+        json_results[video_id] = {
+            "query_strings": queries,
+            "fact_checks": fact_checks,
+        }
+
+    return jsonify(json_results)
+
+# TEST: Get fc and news related articles for a list of videos
+@app.route('/yt/fc-news', methods=['GET'])
+def youtube_fc_news(video_ids=None):
+    video_ids = request.args.get('ids')
+    video_ids, err, code = utils.assert_video_ids(video_ids)
+    if err:
+        return err, code
+
+    res = youtube_blob_keywords(video_ids)
+
+    json_results = {}
+    for video_id in res:
+        queries = res[video_id]["query_strings"]
+
+        queries = utils.strings_to_bytes(queries) 
+        fact_checks = go_interface.fact_check_cc(queries)
+        news = go_interface.news_api_cc(queries)
+        queries =  utils.bytes_to_strings(queries)
+        
+        json_results[video_id] = {
+            "query_strings": queries,
+            "fact_checks": fact_checks,
+            "news": news,
+        }
+
+    return jsonify(json_results)
+
+
 # TEST: Get fact checked results for a list of queries
-@app.route('/test/fc')
-def test_fact_check_cc():
+@app.route('/fc', methods=['GET'])
+def fact_check_cc(queries=None):
+    if queries is None:
+        queries = request.args.get('queries')   
+        if not queries:
+            return jsonify({'error': 'Missing queries parameter'}), 400
+        queries = queries.split(',') if ',' in queries else [queries]
+
     with utils.track_memory_usage("TEST: fact check"):
-        queries = ['JD Vance Couch', 'Global Warming', 'Olympics', 'Ukraine', 'COVID-19', 'Russia', 'Trump', 'Donald Trump']
         queries = utils.strings_to_bytes(queries)
         res = go_interface.fact_check_cc(queries)
         return jsonify(res)
 
 # TEST: Get news headlines for a list of queries
-@app.route('/test/news')
-def test_news_api_cc():
+@app.route('/news', methods=['GET'])
+def news_api_cc(queries=None):
+    if queries is None:
+        queries = request.args.get('queries')   
+        if not queries:
+            return jsonify({'error': 'Missing queries parameter'}), 400
+        queries = queries.split(',') if ',' in queries else [queries]
+
     with utils.track_memory_usage("TEST: news API"):
-        queries = ['Global Warming', 'COVID-19', 'Olympics']
         queries = utils.strings_to_bytes(queries)
         res = go_interface.news_api_cc(queries)
         return jsonify(res)
