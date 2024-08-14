@@ -43,7 +43,7 @@ def get_yt_transcript():
 
 # ROUTE: Go calls this concurrently to return relevant transcripts for a list of videos
 @app.route('/yt/relevant-transcript', methods=['GET'])
-def get_yt_keywords():
+def get_yt_rel_transcript():
     video_id = request.args.get('id')
     if not video_id:
         return jsonify({'error': 'Missing video_id parameter'}), 400

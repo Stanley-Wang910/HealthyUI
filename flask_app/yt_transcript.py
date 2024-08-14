@@ -158,8 +158,6 @@ def get_relevant_transcript(video_ids, tolerance_sec=20, option="asc"):
     # Splice link, Convert to bytes for C functions
 
     res = go_interface.youtube_transcript_most_replayed_cc(video_ids)
-
-    print(res)
    
 
     transcript_list = {}
