@@ -36,15 +36,6 @@ func main() {
 	// // 	log.Fatalf("Error loading .env file: %v", errEnv)
 	// // }
 
-	// // apiKey := ""
-
-	// // cApiKey := C.CString(apiKey)
-	// // defer C.free(unsafe.Pointer(cApiKey))
-
-	// startTime := time.Now()
-	// result := youtubeGETtranscriptConcurrent(cQueriesPtr, C.int(queryCount))
-	// defer C.free(unsafe.Pointer(result))
-
 	// // Convert the result back to a Go string
 	// goResult := C.GoString(result)
 

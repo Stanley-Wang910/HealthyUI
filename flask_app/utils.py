@@ -4,6 +4,7 @@ import logging
 import contextlib
 import time
 import colorlog
+from flask import jsonify
 
 # Configure colorlog
 handler = colorlog.StreamHandler()
@@ -42,3 +43,19 @@ def strings_to_bytes(strings):
         bytes = string.encode('utf-8')
         strings[i] = bytes
     return strings
+
+
+def bytes_to_strings(bytes_list):
+    strings = []
+    for i, bytes in enumerate(bytes_list):
+        strings.append(bytes.decode('utf-8'))
+    return strings
+
+def assert_video_ids(video_ids):
+    if not video_ids:
+        return None, jsonify({'error': 'Missing ids parameter'}), 400
+    
+    video_ids = video_ids.split(',') if ',' in video_ids else [video_ids]
+
+    return video_ids, None, None
+            
