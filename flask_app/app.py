@@ -322,10 +322,4 @@ def news_api_cc(queries=None):
 
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 5000))  # Default to 5000 if not set
-
-
-
-
-    
-
-
+    app.run(debug=True, port=port)
