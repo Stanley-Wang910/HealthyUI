@@ -2,22 +2,18 @@ import { Box, Skeleton } from '@mui/material'
 import YouTube, { YouTubeEvent } from 'react-youtube'
 import React, { useEffect, useRef, useState } from 'react'
 import { VideoType } from '../api/dto'
+import { VideoFactCheck } from '../api/dto'
 import CardMeta from './widget/CardMeta'
 
 
-type VideoItem = VideoType[string]['items'][0]
-type FactCheckData = any
-
-const YoutubePlayerWrapper = ({
-  id,
-  meta,
-  // factcheckData
-}: {
+type Props = {
   id: string
-  meta?: VideoItem | null,
-  // factCheckData?: any;
+  meta: VideoType[string]['items'][0] | null
+  factCheckData?: VideoFactCheck
+  isFactCheckLoading: boolean
+}
+const YoutubePlayerWrapper: React.FC<Props> = ({ id, meta, factCheckData, isFactCheckLoading }) => {
 
-}) => {
   const [timeWatched, setTimeWatched] = useState(0)
   const intervalRef = useRef(null)
   const playerRef = useRef(null)
@@ -107,7 +103,7 @@ const YoutubePlayerWrapper = ({
           id={id}
           className={'youtube-wrapper'}
           iframeClassName={'youtube-iframe-wrapper'}
-          title={'nto sure if we need this yet'}
+          title={'not sure if we need this yet'}
           opts={{
             enablejsapi: 1,
             rel: 0
@@ -121,7 +117,7 @@ const YoutubePlayerWrapper = ({
           onPlaybackRateChange={onPlaybackRateChange}
           onPlaybackQualityChange={onPlaybackQualityChange}
         />
-        {ready && meta && <CardMeta meta={meta} />}
+        {ready && meta && <CardMeta meta={meta}  factCheckData={factCheckData} isFactCheckLoading={isFactCheckLoading} />}
       </Box>
     </>
   )

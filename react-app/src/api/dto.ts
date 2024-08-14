@@ -1,3 +1,5 @@
+import { Query } from "@tanstack/react-query";
+
 export type VideoType = {
   [videoId: string]: {
     items: Array<{
@@ -53,3 +55,36 @@ export type VideoType = {
 }
 
 
+export type FackCheckResponse = {
+  [videoId: string]: VideoFactCheck;
+}
+
+export type VideoFactCheck = {
+  fact_checks: {
+    [query: string]: QueryFactCheck;
+  };
+  query_strings: string[];
+  }
+
+export type QueryFactCheck = {
+    claims: Claim[];
+    next_page_token: string;
+    numer_of_claims: number;
+    query: string;
+  }
+
+export type Claim = {
+  claimDate?: string;
+  claimReview: ClaimReview[];
+  claimant?: string;
+  text: string;
+}
+
+export type ClaimReview = {
+  name: string;
+  reviewDate: string;
+  site: string;
+  textualRating: string;
+  title: string;
+  url: string;
+}

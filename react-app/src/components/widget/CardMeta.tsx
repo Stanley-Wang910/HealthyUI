@@ -11,8 +11,8 @@ import Typography from '@mui/material/Typography'
 import { red } from '@mui/material/colors'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
-import { Box, Chip, Grid, LinearProgress } from '@mui/material'
-import { VideoType } from '../../api/dto'
+import { Box, Chip, CircularProgress, Grid, LinearProgress } from '@mui/material'
+import { VideoType, VideoFactCheck } from '../../api/dto'
 
 interface ExpandMoreProps extends IconButtonProps {
   expand: boolean
@@ -31,7 +31,15 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
 
 type VideoItem = VideoType[string]['items'][0]
 
-const CardMeta = ({ meta }: { meta: VideoItem }) => {
+const CardMeta = ({ 
+  meta, 
+  factCheckData,
+  isFactCheckLoading 
+}: { 
+  meta: VideoItem;
+  factCheckData?: VideoFactCheck;
+  isFactCheckLoading: boolean;
+}) => {
   const [expanded, setExpanded] = React.useState(false)
 
   const handleExpandClick = () => {
@@ -59,29 +67,42 @@ const CardMeta = ({ meta }: { meta: VideoItem }) => {
       />
 
       <CardContent>
+        {isFactCheckLoading ? (
+          <CircularProgress />
+        ) : factCheckData ? (
+          <>
         <Typography variant="body2" color="text.secondary">
-          {placeholder}
+          Fact Check Queries:
         </Typography>
-        <Box
-          sx={{
-            paddingTop: '50px'
-          }}
-        >
-          <Grid container sx={{ alignItems: 'center' }}>
-            <Grid item xs={2} spacing={1}>
-              <Chip label="left wing" variant="outlined" />
-            </Grid>
-            <Grid item xs={8}>
-              <LinearProgress
-                variant="determinate"
-                value={spectrumCalc * 100}
-              />
-            </Grid>
-            <Grid item xs={2}>
-              <Chip label="right wing" variant="outlined" />
-            </Grid>
-          </Grid>
-        </Box>
+        {factCheckData.query_strings.map((query, index) => (
+          <Chip key={index} label={query} variant="outlined" style={{margin: '5px'}} />
+        ))}
+        <Typography variant="body1" color="text.primary" style={{marginTop: '20px'}}>
+              Claims:
+        </Typography>
+        {Object.entries(factCheckData.fact_checks).map(([query, check]) => (
+            check.claims.map((claim, claimIndex) => (
+              <Box key={`${query}-${claimIndex}`} style={{marginBottom: '15px'}}>
+                <Typography variant="body2" color="text.secondary">
+                  {claim.text}
+                </Typography>
+                {claim.claimReview.map((review, reviewIndex) => (
+                  <Chip 
+                    key={reviewIndex}
+                    label={`${review.textualRating} - ${review.name}`}
+                    color={review.textualRating.toLowerCase() === 'false' ? 'error' : 'default'}
+                    style={{margin: '5px'}}
+                  />
+                ))}
+              </Box>
+            ))
+          ))}
+          </>
+        ) : (
+          <Typography variant="body2" color="text.secondary">
+            {placeholder}
+          </Typography>
+        )}
       </CardContent>
 
       <CardActions disableSpacing>

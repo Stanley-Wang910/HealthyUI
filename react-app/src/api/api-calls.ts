@@ -23,7 +23,18 @@ export const fetchUserVideos = async (videoIds: string | string[] = []) => {
   return data;
 };
 
-export const fetchNewsFactCheck = async (videoMeta: any) => {
-  const { data } = await axios.post(`${apiHost}/yt/fc`, videoMeta);
+export const fetchNewsFactCheck = async (videoIds: string[], vidData: any) => {
+    const { data } = await axios.post(`${apiHost}/yt/fc`, {
+      video_ids: videoIds,
+      vid_data: vidData
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+  if (!data.success) {
+    throw new Error(data.message)
+  }
+
   return data;
 };

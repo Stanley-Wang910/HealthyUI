@@ -7,11 +7,14 @@ import { useQuery } from '@tanstack/react-query'
 import YoutubePlayerWrapper from './VideoPlayer'
 import { Grid, Modal, Skeleton } from '@mui/material'
 import { fetchNewsFactCheck } from '../api/api-calls'
+import { useQueryClient } from '@tanstack/react-query'
 
 
 
 const MainFeed = () => {
-  const ids = ['d7cit3N5awE', 'OwgMv4YLU0k', 'E6bVBH9y5O8', 'M1u1ECx_Nlw', 'udiEkZSvS5E', 'AxHcShn_HvM', 'eYcpXamLmWg', 'LvXwXKjIP0A'];
+  const ids = ['bNH16A4f5Yk', 'OwgMv4YLU0k', 'E6bVBH9y5O8', 'M1u1ECx_Nlw', 'udiEkZSvS5E', 'AxHcShn_HvM', 'eYcpXamLmWg', 'LvXwXKjIP0A'];
+  const queryClient = useQueryClient();
+
   const { data, error, isError, isLoading } = useQuery<VideoType>({
     queryKey: ['fetchUserVideos'],
     queryFn: () => {
@@ -21,24 +24,43 @@ const MainFeed = () => {
 
   });
     
- 
 
   const [open, setOpen] = React.useState<boolean>(false)
   const [videoId, setVideoId] = React.useState<string>('')
   const [meta, setVideoMeta] = React.useState<VideoType[string]['items'][0] | null>(null)
 
-  const { data: factCheckData, refetch: refetchFactCheck } = useQuery({
+  const { data: factCheckData, refetch: refetchFactCheck, isLoading: isFactCheckLoading, error: factCheckError } = useQuery({
     queryKey: ['fetchNewsFactCheck', videoId],
-    queryFn: () => fetchNewsFactCheck(meta),
-    enabled: false, // This query won't run automatically
+    queryFn: async () => {
+      console.log('Fetching fact check for videoId:', videoId);
+      if (!videoId || !meta) {
+        console.error('VideoId or meta is not set');
+        throw new Error('VideoId or meta is not set');
+      }
+      const result = await fetchNewsFactCheck([videoId], { [videoId]: { items: [meta] } });
+      console.log('Fact check result:', result);
+      return result;
+    },
+    enabled: false,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  
   });
-
-
-  const handleOpen = (id: string, videoMeta: VideoType[string]['items'][0]) => {
+  const handleOpen = async (id: string, videoMeta: VideoType[string]['items'][0]) => {
+    console.log('handleOpen', id, videoMeta)
     setVideoId(id)
     setVideoMeta(videoMeta)
     setOpen(true)
-    refetchFactCheck()
+    console.log('Invalidating and refetching fact check query');
+    await queryClient.invalidateQueries({ queryKey: ['fetchNewsFactCheck', id] });
+    
+    try {
+      const result = await refetchFactCheck();
+      console.log('Refetch result:', result);
+    } catch (error) {
+      console.error('Error during refetch:', error);
+    }
   }
   const handleClose = () => {
     setOpen(false)
@@ -171,7 +193,7 @@ return (
           p: 3
         }}
       >
-        <YoutubePlayerWrapper id={videoId} meta={meta} />
+        <YoutubePlayerWrapper id={videoId} meta={meta}  factCheckData={factCheckData?.[videoId]} isFactCheckLoading={isFactCheckLoading} />
       </Modal>
     </>
   )

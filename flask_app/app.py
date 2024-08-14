@@ -53,8 +53,6 @@ def get_yt_rel_transcript():
     transcript = yt_transcript.get_relevant_transcript(video_id, tolerance_sec=20, option="asc")
     return jsonify(transcript)
 
-
-
 # ROUTE: Get video metadata for a list of videos
 @app.route('/yt/video', methods=['GET'])
 def youtube_metadata_cc(video_ids=None):
@@ -150,13 +148,11 @@ def youtube_blob_keywords(video_ids=None):
         video_ids, err, code = utils.assert_video_ids(video_ids)
         if err:
             return err, code
-
-
+    
     video_ids = yt_transcript.extract_ids(video_ids)
     vid_data = go_interface.youtube_cc(video_ids)
     transcripts = yt_transcript.get_relevant_transcript(video_ids)
     
-
     json_results = {}
     for video_id in vid_data:
         title = vid_data[video_id]["items"][0]["snippet"]["title"]
@@ -201,7 +197,7 @@ def youtube_blob_keywords(video_ids=None):
                                 best_keywords[c] = score * s
             
         # How many queries to generate, and how many keywords per query
-        query_strings = trk.generate_query_strings(best_keywords, num_q=5, keywords_per_q=2)
+        query_strings = trk.generate_query_strings(best_keywords, num_q=3, keywords_per_q=3)
         query_strings = list(query_strings)
 
         json_results[video_id] = {
@@ -261,13 +257,25 @@ def youtube_fc(video_ids=None):
         queries = utils.strings_to_bytes(queries) 
         fact_checks = go_interface.fact_check_cc(queries)
         queries =  utils.bytes_to_strings(queries)
-        
-        json_results[video_id] = {
-            "query_strings": queries,
-            "fact_checks": fact_checks,
-        }
+
+        video_fc = {}
+        has_claims = False
+        for query in queries:
+            print("query:", query)
+            if fact_checks[query]['claims'] and fact_checks[query]['number_of_claims'] > 0:
+                print(fact_checks[query]['number_of_claims'])
+                video_fc[query] = fact_checks[query]
+                has_claims = True
+        if has_claims:
+            print(f"{query} has claims")
+            
+            json_results[video_id] = {
+                "query_strings": queries,
+                "fact_checks": video_fc,
+            }
 
     return jsonify(json_results)
+
 
 # ROUTE: Get fc and news related articles for a list of videos
 @app.route('/yt/fc-news', methods=['GET'])
