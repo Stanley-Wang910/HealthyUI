@@ -1,0 +1,21 @@
+# More information: https://docs.platform.sh/define-routes.html
+"https://{default}/":
+    type: upstream
+    upstream: "frontend:http"
+
+# A basic redirect definition
+# More information: https://docs.platform.sh/define-routes.html#basic-redirect-definition
+"https://www.{default}/":
+    type: redirect
+    to: "https://{default}/"
+
+# More information: https://docs.platform.sh/define-routes.html
+"https://backend.{default}/":
+    type: upstream
+    upstream: "flask:http"
+
+# A basic redirect definition
+# More information: https://docs.platform.sh/define-routes.html#basic-redirect-definition
+"https://www.backend.{default}/":
+    type: redirect
+    to: "https://{default}/"
