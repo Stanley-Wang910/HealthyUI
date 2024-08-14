@@ -17,13 +17,9 @@ trk = keyword_ex.TextRankKeyword()
 app = Flask(__name__)
 
 # CORS(app, supports_credentials=True, origins=['*'])
-# the supports credentials option is bugging sometimes
+# ROUTEsupports credentials option is bugging sometimes
 CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
-
-
-
-
 
 @app.route('/api/video/get-playlist/<keyword>')
 @app.route('/api/video/get-playlist/', defaults={'keyword': None})
@@ -35,6 +31,8 @@ def get_user_videos_playlist(keyword: str):
         print("No keyword provided")
     return jsonify(user_videos.get_user_videos_playlist_service(keyword))
 
+
+# ROUTE: Go calls this concurrently to return transcripts for a list of videos
 @app.route('/yt/transcript', methods=['GET'])
 def get_yt_transcript():
     video_id = request.args.get('id')
@@ -43,6 +41,7 @@ def get_yt_transcript():
     transcript, source = yt_transcript.get_transcript(video_id)
     return jsonify({'transcript': transcript, 'source': source})
 
+# ROUTE: Go calls this concurrently to return relevant transcripts for a list of videos
 @app.route('/yt/relevant-transcript', methods=['GET'])
 def get_yt_keywords():
     video_id = request.args.get('id')
@@ -56,7 +55,7 @@ def get_yt_keywords():
 
 
 
-# TEST: Get video metadata for a list of videos
+# ROUTE: Get video metadata for a list of videos
 @app.route('/yt/video', methods=['GET'])
 def youtube_metadata_cc(video_ids=None):
     if video_ids is None:
@@ -65,12 +64,11 @@ def youtube_metadata_cc(video_ids=None):
         if err:
             return err, code
 
-    with utils.track_memory_usage("TEST: grab youtube metadata"):
-        video_ids = yt_transcript.extract_ids(video_ids)
-        res = go_interface.youtube_cc(video_ids)
-        return jsonify(res)
+    video_ids = yt_transcript.extract_ids(video_ids)
+    res = go_interface.youtube_cc(video_ids)
+    return jsonify(res)
 
-# TEST: Get transcripts and most replayed timestamps concurrently for a list of videos
+# ROUTE: Get transcripts and most replayed timestamps concurrently for a list of videos
 @app.route('/yt/tr-mr', methods=['GET'])
 def youtube_transcript_most_replayed_cc(video_ids=None):   
     if video_ids is None:
@@ -79,12 +77,11 @@ def youtube_transcript_most_replayed_cc(video_ids=None):
         if err:
             return err, code
 
-    with utils.track_memory_usage("TEST: grab youtube transcripts and most replayed timestamps"):
-        video_ids = yt_transcript.extract_ids(video_ids)
-        res = go_interface.youtube_transcript_most_replayed_cc(video_ids)
-        return jsonify(res)
+    video_ids = yt_transcript.extract_ids(video_ids)
+    res = go_interface.youtube_transcript_most_replayed_cc(video_ids)
+    return jsonify(res)
 
-# TEST: Get relevant transcripts and most rewatched timestamps for a list of videos concurrently
+# ROUTE: Get relevant transcripts and most rewatched timestamps for a list of videos concurrently
 @app.route('/yt/rtr', methods=['GET'])
 def youtube_relevant_transcript_cc(video_ids=None):
     if video_ids is None:
@@ -93,12 +90,11 @@ def youtube_relevant_transcript_cc(video_ids=None):
         if err:
             return err, code
 
-    with utils.track_memory_usage("TEST: grab youtube videos relevant transcripts"):
-        video_ids = yt_transcript.extract_ids(video_ids)
-        res = go_interface.youtube_relevant_transcript_cc(video_ids)
-        return jsonify(res)
+    video_ids = yt_transcript.extract_ids(video_ids)
+    res = go_interface.youtube_relevant_transcript_cc(video_ids)
+    return jsonify(res)
 
-# TEST: Get keywords and keyphrases, query strings from youtube metadata + relevant transcripts
+# ROUTE: Get keywords and keyphrases, query strings from youtube relevant transcripts
 @app.route('/yt/tr-kw', methods=['GET'])
 def youtube_transcript_keywords(video_ids=None):
     if video_ids is None:
@@ -115,39 +111,38 @@ def youtube_transcript_keywords(video_ids=None):
         return jsonify({'error': 'No transcripts found'})
 
 
-    with utils.track_memory_usage("TEST: youtube keywords + keyphrases"):
-        json_results = {}
-        for video_id in transcripts:
-            text = transcripts[video_id]['text']
+    json_results = {}
+    for video_id in transcripts:
+        text = transcripts[video_id]['text']
 
-            if text is None:
-                json_results[video_id] = {
-                    "query_strings": [],
-                    "keywords": [],
-                    "keyphrases": []
-                }
-                continue
-            
-            trk.analyze(text, candidate_pos = ['NOUN', 'PROPN'], window_size=4, lower=False)
-            keywords = trk.get_keywords(10)
-            keyphrases = trk.yake_phrasing(text)
-            dict_keyphrases = {k[0]: k[1] for k in keyphrases}
-        
-            # How many queries to generate, and how many keywords per query
-            query_strings = trk.generate_query_strings(keywords, num_q=3, keywords_per_q=3)
-
-            query_strings = list(query_strings)
-
+        if text is None:
             json_results[video_id] = {
-                "query_strings": query_strings,
-                "keywords": keywords,
-                "keyphrases": dict_keyphrases
-            }          
+                "query_strings": [],
+                "keywords": [],
+                "keyphrases": []
+            }
+            continue
+        
+        trk.analyze(text, candidate_pos = ['NOUN', 'PROPN'], window_size=4, lower=False)
+        keywords = trk.get_keywords(10)
+        keyphrases = trk.yake_phrasing(text)
+        dict_keyphrases = {k[0]: k[1] for k in keyphrases}
+    
+        # How many queries to generate, and how many keywords per query
+        query_strings = trk.generate_query_strings(keywords, num_q=3, keywords_per_q=3)
+
+        query_strings = list(query_strings)
+
+        json_results[video_id] = {
+            "query_strings": query_strings,
+            "keywords": keywords,
+            "keyphrases": dict_keyphrases
+        }          
 
     return jsonify(json_results)
 
 
-# TEST: Get best combination of keywords from youtube metadata + relevant transcripts 
+# ROUTE: Get best combination of keywords from youtube metadata (title, desc) + relevant transcripts 
 @app.route('/yt/b-kw', methods=['GET'])
 def youtube_blob_keywords(video_ids=None):
     if video_ids is None:
@@ -158,71 +153,68 @@ def youtube_blob_keywords(video_ids=None):
 
 
     video_ids = yt_transcript.extract_ids(video_ids)
-    with utils.track_memory_usage("TEST: youtube blob 1"):
-        vid_data = go_interface.youtube_cc(video_ids)
-    with utils.track_memory_usage("TEST: youtube blob 2"):
-        transcripts = yt_transcript.get_relevant_transcript(video_ids)
+    vid_data = go_interface.youtube_cc(video_ids)
+    transcripts = yt_transcript.get_relevant_transcript(video_ids)
     
 
     json_results = {}
-    with utils.track_memory_usage("TEST: youtube blob 3"):
-        for video_id in vid_data:
-            title = vid_data[video_id]["items"][0]["snippet"]["title"]
-            description = vid_data[video_id]["items"][0]["snippet"]["description"]
-            if transcripts[video_id]['text'] is not None:
-                transcript = transcripts[video_id]['text']
-                blob = title + description + transcript
-                t_used = True
-            else:
-                blob = title + description
-                t_used = False
+    for video_id in vid_data:
+        title = vid_data[video_id]["items"][0]["snippet"]["title"]
+        description = vid_data[video_id]["items"][0]["snippet"]["description"]
+        if transcripts[video_id]['text'] is not None:
+            transcript = transcripts[video_id]['text']
+            blob = title + description + transcript
+            t_used = True
+        else:
+            blob = title + description
+            t_used = False
 
-            trk.analyze(blob, candidate_pos = ['NOUN', 'PROPN'], window_size=4, lower=False)
-            keywords = trk.get_keywords(10)
-            print(keywords)
-            keyphrases = trk.yake_phrasing(blob)
-            dict_keyphrases = {k[0]: k[1] for k in keyphrases[:5]} # limit to 5 keyphrases
+        trk.analyze(blob, candidate_pos = ['NOUN', 'PROPN'], window_size=4, lower=False)
+        keywords = trk.get_keywords(10)
+        print(keywords)
+        keyphrases = trk.yake_phrasing(blob)
+        dict_keyphrases = {k[0]: k[1] for k in keyphrases[:5]} # limit to 5 keyphrases
 
-            tags = vid_data[video_id]["items"][0]["snippet"]["tags"]
+        tags = vid_data[video_id]["items"][0]["snippet"]["tags"]
 
-            if tags is not None:
-                best_keywords = {}
-    
-                for keyword, score in keywords.items():
-                    closest = trk.closest_keyword2(keyword, tags)
-                    if closest is None:
-                        best_keywords[keyword] = score
-                    else:
-                        # replace keyword with closest keyword
-                        for c, s in closest.items():
-                            best_keywords[c] = score * s
-                    if closest is None:
-                        for keyphrase, score in dict_keyphrases.items():
-                            closest = trk.closest_keyword2(keyphrase, tags)
-                            if closest is None:
-                                best_keywords[keyphrase] = score
-                            else:
-                                # replace keyword with closest keyword
-                                for c, s in closest.items():
-                                    best_keywords[c] = score * s
-                
-            # How many queries to generate, and how many keywords per query
-            query_strings = trk.generate_query_strings(best_keywords, num_q=10, keywords_per_q=3)
-            query_strings = list(query_strings)
+        if tags is not None:
+            best_keywords = {}
 
-            json_results[video_id] = {
-                "query_strings": query_strings,
-                "keyphrases": dict_keyphrases,
-                "best_keywords": best_keywords,
-                "tags": tags,
-                "keywords": keywords, 
-                "transcript_used": t_used
-                }
+            for keyword, score in keywords.items():
+                closest = trk.closest_keyword2(keyword, tags)
+                if closest is None:
+                    best_keywords[keyword] = score
+                else:
+                    # replace keyword with closest keyword
+                    for c, s in closest.items():
+                        best_keywords[c] = score * s
+                if closest is None:
+                    for keyphrase, score in dict_keyphrases.items():
+                        closest = trk.closest_keyword2(keyphrase, tags)
+                        if closest is None:
+                            best_keywords[keyphrase] = score
+                        else:
+                            # replace keyword with closest keyword
+                            for c, s in closest.items():
+                                best_keywords[c] = score * s
+            
+        # How many queries to generate, and how many keywords per query
+        query_strings = trk.generate_query_strings(best_keywords, num_q=10, keywords_per_q=3)
+        query_strings = list(query_strings)
+
+        json_results[video_id] = {
+            "query_strings": query_strings,
+            "keyphrases": dict_keyphrases,
+            "best_keywords": best_keywords,
+            "tags": tags,
+            "keywords": keywords, 
+            "transcript_used": t_used
+            }
 
     return json_results
 
 
-# TEST: Get related news articles for a list of videos
+# ROUTE: Get related news articles for a list of videos
 @app.route('/yt/news', methods=['GET'])
 def youtube_news(video_ids=None):
     video_ids = request.args.get('ids')
@@ -249,7 +241,7 @@ def youtube_news(video_ids=None):
     return jsonify(json_results)
 
 
-# TEST: Get fact checked related articles for a list of videos
+# ROUTE: Get fact checked related articles for a list of videos
 @app.route('/yt/fc', methods=['GET'])
 def youtube_fc(video_ids=None):
     video_ids = request.args.get('ids')
@@ -274,7 +266,7 @@ def youtube_fc(video_ids=None):
 
     return jsonify(json_results)
 
-# TEST: Get fc and news related articles for a list of videos
+# ROUTE: Get fc and news related articles for a list of videos
 @app.route('/yt/fc-news', methods=['GET'])
 def youtube_fc_news(video_ids=None):
     video_ids = request.args.get('ids')
@@ -302,7 +294,7 @@ def youtube_fc_news(video_ids=None):
     return jsonify(json_results)
 
 
-# TEST: Get fact checked results for a list of queries
+# ROUTE: Get fact checked results for a list of queries
 @app.route('/fc', methods=['GET'])
 def fact_check_cc(queries=None):
     if queries is None:
@@ -311,12 +303,11 @@ def fact_check_cc(queries=None):
             return jsonify({'error': 'Missing queries parameter'}), 400
         queries = queries.split(',') if ',' in queries else [queries]
 
-    with utils.track_memory_usage("TEST: fact check"):
-        queries = utils.strings_to_bytes(queries)
-        res = go_interface.fact_check_cc(queries)
-        return jsonify(res)
+    queries = utils.strings_to_bytes(queries)
+    res = go_interface.fact_check_cc(queries)
+    return jsonify(res)
 
-# TEST: Get news headlines for a list of queries
+# ROUTE: Get news headlines for a list of queries
 @app.route('/news', methods=['GET'])
 def news_api_cc(queries=None):
     if queries is None:
@@ -325,10 +316,9 @@ def news_api_cc(queries=None):
             return jsonify({'error': 'Missing queries parameter'}), 400
         queries = queries.split(',') if ',' in queries else [queries]
 
-    with utils.track_memory_usage("TEST: news API"):
-        queries = utils.strings_to_bytes(queries)
-        res = go_interface.news_api_cc(queries)
-        return jsonify(res)
+    queries = utils.strings_to_bytes(queries)
+    res = go_interface.news_api_cc(queries)
+    return jsonify(res)
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

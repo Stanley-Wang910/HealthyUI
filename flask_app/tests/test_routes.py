@@ -2,6 +2,7 @@ from flask import request
 import json
 from conftest import client
 import pytest
+import utils
 
 @pytest.fixture(params=[
     'qwbIu2PzCRs',
@@ -32,7 +33,9 @@ def queries(request):
 ])
 def test_youtube_endpoints(client, ids, endpoint):   # test single video id
     query_string = {'ids': ids}
-    response = client.get(endpoint, query_string=query_string)
+
+    with utils.track_memory_usage(f"TEST: {endpoint}"):
+        response = client.get(endpoint, query_string=query_string)
 
     if not ids:
         assert response.status_code == 400
