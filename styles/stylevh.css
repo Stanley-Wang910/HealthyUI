@@ -1,0 +1,45 @@
+h1,
+h2,
+h3 {
+    color: rgb(40, 107, 231);
+    text-align: center;
+    padding: auto;
+  }
+
+p {
+    color: rgb(40, 107, 231);
+    text-align: left;
+    padding: auto;
+    margin-left: 2%;
+    font-size: large;
+}
+  
+p:hover {
+  letter-spacing: 5px;
+  transition: 1s;
+  text-shadow: 1px 1px 2px rgb(0, 247, 255), 0 0 1em rgb(0, 247, 255), 0 0 0.2em rgb(0, 247, 255);
+}
+
+iframe {
+    display: block;
+    margin: 0.5% 2% 0.5%;
+  }
+
+.block {
+    text-align: left;
+    display: block;
+    border: 3px solid rgb(40, 107, 231);
+    border-radius: 15px;
+    padding: .5em;
+    margin-left: 40%;
+    margin-right: 40%;
+  }
+
+  .block:hover {
+    border: 3px solid rgb(0, 247, 255);
+    transition: 2s;
+  }
+
+body {
+    font-family: sans-serif;
+  }
