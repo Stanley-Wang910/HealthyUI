@@ -15,6 +15,7 @@ import { Box, Chip, Grid, LinearProgress } from '@mui/material'
 import { VideoType } from '../../api/dto'
 import { useQuery } from '@tanstack/react-query'
 import { fetchNewsFactCheck } from '../../api/api-calls'
+import FactCheck from '../FactCheck'
 
 interface ExpandMoreProps extends IconButtonProps {
   expand: boolean
@@ -34,14 +35,15 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
 const CardMeta = ({ id, meta }: { id: string; meta: VideoType['huiMeta'] }) => {
   const [expanded, setExpanded] = React.useState(false)
 
-  const {
-    data: factCheckData,
-    error: factCheckErrror,
-    isError: isFactCheckErrror,
-    isLoading: isFactCheckLoading
-  } = useQuery({
-    queryKey: ['fetchNewsFactCheck'],
-    queryFn: () => fetchNewsFactCheck(id)
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['fetchNewsFactCheck', id],
+    queryFn: async () => {
+      const result = fetchNewsFactCheck(id)
+      console.log('Fact check result:', result)
+      return result
+    },
+    enabled: !!id,
+    retry: 3
   })
 
   const handleExpandClick = () => {
@@ -89,6 +91,10 @@ const CardMeta = ({ id, meta }: { id: string; meta: VideoType['huiMeta'] }) => {
               <Chip label="right wing" variant="outlined" />
             </Grid>
           </Grid>
+        </Box>
+
+        <Box>
+          <FactCheck factCheckData={data} isLoading={isLoading} error={error} />
         </Box>
       </CardContent>
 

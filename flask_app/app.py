@@ -358,5 +358,5 @@ def news_api_cc(queries=None):
     return jsonify(res)
 
 if __name__ == '__main__':
-    port = int(os.getenv('PORT', 5000))  # Default to 5000 if not set
+    port = int(os.getenv('BACKEND_PORT', 5000))  # Default to 5000 if not set
     app.run(debug=True, port=port)
