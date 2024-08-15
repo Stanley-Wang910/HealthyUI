@@ -109,7 +109,7 @@ const YoutubePlayerWrapper = ({
           id={id}
           className={'youtube-wrapper'}
           iframeClassName={'youtube-iframe-wrapper'}
-          title={'nto sure if we need this yet'}
+          title={'not sure if we need this yet'}
           opts={{
             enablejsapi: 1,
             rel: 0

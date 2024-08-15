@@ -201,7 +201,7 @@ def youtube_relevant_transcript_cc(ids):
         print(f"Error type: {type(e)}")
 
 
-    
+
 
 
 

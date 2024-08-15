@@ -1,3 +1,5 @@
+import { Query } from "@tanstack/react-query";
+
 // export type VideoType = {
 //   id: string
 //   title: string
@@ -24,10 +26,12 @@
 // however we only need the list of things in 'items'
 // as frontend expects a flat list of videos for now
 export type YoutubeAPIResType = {
-  [videoId: string]: {
-    items: VideoType[]
-  }
+    [videoId: string]: {
+        items: VideoType[]
+    }
 }
+
+
 
 export type VideoType = {
   id: string
@@ -85,4 +89,39 @@ export type VideoType = {
     placeholder: string
     description: string
   }
+}
+
+
+export type FactCheckResponse = {
+  [videoId: string]: VideoFactCheck;
+}
+
+export type VideoFactCheck = {
+  fact_checks: {
+    [query: string]: QueryFactCheck;
+  };
+  query_strings: string[];
+  }
+
+export type QueryFactCheck = {
+    claims: Claim[];
+    next_page_token: string;
+    numer_of_claims: number;
+    query: string;
+  }
+
+export type Claim = {
+  claimDate?: string;
+  claimReview: ClaimReview[];
+  claimant?: string;
+  text: string;
+}
+
+export type ClaimReview = {
+  name: string;
+  reviewDate: string;
+  site: string;
+  textualRating: string;
+  title: string;
+  url: string;
 }

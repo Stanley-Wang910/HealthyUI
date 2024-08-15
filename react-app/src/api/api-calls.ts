@@ -34,7 +34,14 @@ export const fetchVideosById = async (videoIds: string | string[] = []) => {
   return data
 }
 
-export const fetchNewsFactCheck = async (videoId: string) => {
-  const { data } = await axios.post(`${apiHost}/yt/fc`, videoId)
-  return data
-}
+export const fetchNewsFactCheck = async (videoIds: string | string[] = []) => {
+  const ids = Array.isArray(videoIds) ? videoIds : [videoIds];
+  const encodedIds = encodeURIComponent(ids.join(','));
+  const url = `${apiHost}/yt/fc?ids=${encodedIds}`
+  console.log(url)
+  const { data } = await axios.get(
+    `${apiHost}/yt/fc?ids=${encodedIds}`
+  );
+  console.log(data)
+  return data;
+};
