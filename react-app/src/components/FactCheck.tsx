@@ -110,7 +110,6 @@ const FactCheck: React.FC<FactCheckProps> = ({ factCheckData, isLoading, error }
                 />
               ))}
             </Box>
-            
           ))}
         </Box>
       ))}

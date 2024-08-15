@@ -5,8 +5,11 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"sync"
 	"sync/atomic"
+
+	"github.com/joho/godotenv"
 )
 
 // #include <stdbool.h>
@@ -349,10 +352,13 @@ func youtubeGETmostReplayed(id string) (YoutubeMostReplayedRes, error) {
 	return youtubeMRRes, nil
 }
 
-func youtubeGETtranscript(id string) (TranscriptRes, error) {
+func youtubeGETtranscript(id string, port string) (TranscriptRes, error) {
 	var transcriptResponse TranscriptRes
 	// Subject to change with domain / port
-	req, err := http.NewRequest("GET", "http://localhost:5000/yt/transcript", nil)
+
+	reqUrl := fmt.Sprintf("http://localhost:%s", port)
+
+	req, err := http.NewRequest("GET", reqUrl+"/yt/transcript", nil)
 
 	if err != nil {
 		return transcriptResponse, fmt.Errorf("error with GET youtube transcript request: %v", err)
@@ -390,6 +396,17 @@ func youtubeGETtranscript(id string) (TranscriptRes, error) {
 func YoutubeGETtranscriptMostReplayedCC(_ids **C.char, idCount C.int) *C.char {
 	ids := CStrArrayToSlice(_ids, idCount)
 
+	// load backend port from .env file
+	err := godotenv.Load()
+	if err != nil {
+		return C.CString(fmt.Sprintf("Error loading .env file: %v", err))
+	}
+
+	port := os.Getenv("BACKEND_PORT")
+	if port == "" {
+		return C.CString("Error: BACKEND_PORT is empty")
+	}
+
 	var wg sync.WaitGroup
 
 	combinedRes := make(chan struct {
@@ -411,7 +428,7 @@ func YoutubeGETtranscriptMostReplayedCC(_ids **C.char, idCount C.int) *C.char {
 
 			go func() {
 				defer innerWg.Done()
-				combined.Transcript, err1 = youtubeGETtranscript(id)
+				combined.Transcript, err1 = youtubeGETtranscript(id, port)
 			}()
 
 			go func() {
@@ -466,10 +483,12 @@ func YoutubeGETtranscriptMostReplayedCC(_ids **C.char, idCount C.int) *C.char {
 	return C.CString(string(jsonOutput))
 }
 
-func youtubeGETrelevantTranscript(id string) (RelevantTranscriptRes, error) {
+func youtubeGETrelevantTranscript(id string, port string) (RelevantTranscriptRes, error) {
 	var relevantTranscript RelevantTranscriptRes
 
-	req, err := http.NewRequest("GET", "http://localhost:5000/yt/relevant-transcript", nil)
+	reqUrl := fmt.Sprintf("http://localhost:%s", port)
+
+	req, err := http.NewRequest("GET", reqUrl+"/yt/relevant-transcript", nil)
 
 	if err != nil {
 		return relevantTranscript, fmt.Errorf("error with GET youtube rel transcript request: %v", err)
@@ -507,6 +526,17 @@ func youtubeGETrelevantTranscript(id string) (RelevantTranscriptRes, error) {
 func YoutubeGETrelevantTranscriptCC(_ids **C.char, idCount C.int) *C.char {
 	ids := CStrArrayToSlice(_ids, idCount)
 
+	// load backend port from .env file
+	err := godotenv.Load()
+	if err != nil {
+		return C.CString(fmt.Sprintf("Error loading .env file: %v", err))
+	}
+
+	port := os.Getenv("BACKEND_PORT")
+	if port == "" {
+		return C.CString("Error: BACKEND_PORT is empty")
+	}
+
 	var wg sync.WaitGroup
 
 	relevantTranscripts := make(chan struct {
@@ -520,7 +550,7 @@ func YoutubeGETrelevantTranscriptCC(_ids **C.char, idCount C.int) *C.char {
 		go func(id string) {
 			defer wg.Done()
 
-			relevantTranscript, err := youtubeGETrelevantTranscript(id)
+			relevantTranscript, err := youtubeGETrelevantTranscript(id, port)
 
 			relevantTranscripts <- struct {
 				id                 string

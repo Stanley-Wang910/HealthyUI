@@ -1,8 +1,5 @@
 package main
 
-// "time"
-// "unsafe"
-
 // #include <stdbool.h>
 // #include <stdint.h>
 // #include <stdio.h>
@@ -11,9 +8,22 @@ import "C"
 
 // import "fmt"
 
+// import "fmt"
+
 // Test Locally
 
 func main() {
+	// id := "ioqSvLqB46Y"
+	// result, err := youtubeGETrelevantTranscript(id)
+	// if err != nil {
+	// 	fmt.Printf("Error in youtube GET: %v", err)
+	// }
+	// fmt.Println("Result:", result)
+
+	// for _, env := range os.Environ() {
+	// 	pair := strings.SplitN(env, "=", 2)
+	// 	fmt.Printf("%s: %s\n", pair[0], pair[1])
+	// }
 	// queries := []string{"Tw9LWetS49k", "_ZTZGz1xusA", "Nkq_mI2PlM8", "Cl3izXcp86w"}
 	// queryCount := len(queries)
 
