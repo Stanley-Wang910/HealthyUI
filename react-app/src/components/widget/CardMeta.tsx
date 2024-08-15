@@ -13,6 +13,8 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import { Box, Chip, Grid, LinearProgress } from '@mui/material'
 import { VideoType } from '../../api/dto'
+import { useQuery } from '@tanstack/react-query'
+import { fetchNewsFactCheck } from '../../api/api-calls'
 
 interface ExpandMoreProps extends IconButtonProps {
   expand: boolean
@@ -29,17 +31,22 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
   })
 }))
 
-// type VideoItem = VideoType[string]['items'][0]
-
-const CardMeta = ({ meta }: { meta: VideoType['huiMeta'] }) => {
+const CardMeta = ({ id, meta }: { id: string; meta: VideoType['huiMeta'] }) => {
   const [expanded, setExpanded] = React.useState(false)
+
+  const {
+    data: factCheckData,
+    error: factCheckErrror,
+    isError: isFactCheckErrror,
+    isLoading: isFactCheckLoading
+  } = useQuery({
+    queryKey: ['fetchNewsFactCheck'],
+    queryFn: () => fetchNewsFactCheck(id)
+  })
 
   const handleExpandClick = () => {
     setExpanded(!expanded)
   }
-
-  const spectrumCalc = 0.5; // Replace with actual value if available
-  const placeholder = "Placeholder text";
 
   return (
     <Card>
@@ -54,7 +61,7 @@ const CardMeta = ({ meta }: { meta: VideoType['huiMeta'] }) => {
             <MoreVertIcon />
           </IconButton>
         }
-        title={meta.title}
+        title={'placeholer UI title'}
         subheader="This is a static subhead about our video meta"
       />
 
@@ -74,6 +81,7 @@ const CardMeta = ({ meta }: { meta: VideoType['huiMeta'] }) => {
             <Grid item xs={8}>
               <LinearProgress
                 variant="determinate"
+                // this should come from another call
                 value={meta.spectrum_calc * 100}
               />
             </Grid>

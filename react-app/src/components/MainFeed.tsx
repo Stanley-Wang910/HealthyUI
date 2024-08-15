@@ -1,7 +1,6 @@
 import React, { useContext, useState } from 'react'
 import '../styles/MainFeed.css'
 
-import { fetchUserVideos } from '../api/api-calls'
 import { VideoType } from '../api/dto'
 import { useQuery } from '@tanstack/react-query'
 import YoutubePlayerWrapper from './VideoPlayer'
@@ -12,43 +11,41 @@ import CommentIcon from '@mui/icons-material/Comment'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import VideoOpenContext from '../context/context'
-import { fetchNewsFactCheck } from '../api/api-calls'
+import { fetchNewsFactCheck, fetchVideosById } from '../api/api-calls'
 
 const MainFeed = () => {
-
-    //
-    // @stanleys work
-    // const ids = ['d7cit3N5awE', 'OwgMv4YLU0k', 'E6bVBH9y5O8', 'M1u1ECx_Nlw', 'udiEkZSvS5E', 'AxHcShn_HvM', 'eYcpXamLmWg', 'LvXwXKjIP0A'];
-    // const { data, error, isError, isLoading } = useQuery<VideoType>({
-    //     queryKey: ['fetchUserVideos'],
-    //     queryFn: () => {
-    //         console.log('Calling fetchUserVideos with ids:', ids);
-    //         return fetchUserVideos(ids)
-    //     },
-    //
-    // });
-
-
-  const { data, error, isError, isLoading } = useQuery({
-    queryKey: ['fetchUserVideos'],
-    queryFn: () => fetchUserVideos('')
-  })
   const [open, setOpen] = useState<boolean>(false)
   const [videoId, setVideoId] = useState<string>('')
   const [meta, setVideoMeta] = useState<VideoType['huiMeta']>()
   const { value, updateValue } = useContext(VideoOpenContext)
+
+  //
+  // @stanleys work
+  // const ids = ['d7cit3N5awE', 'OwgMv4YLU0k', 'E6bVBH9y5O8', 'M1u1ECx_Nlw', 'udiEkZSvS5E', 'AxHcShn_HvM', 'eYcpXamLmWg', 'LvXwXKjIP0A'];
+  // const { data, error, isError, isLoading } = useQuery<VideoType>({
+  //     queryKey: ['fetchUserVideos'],
+  //     queryFn: () => {
+  //         console.log('Calling fetchUserVideos with ids:', ids);
+  //         return fetchUserVideos(ids)
+  //     },
+  //
+  // });
+
+  const { data, error, isError, isLoading } = useQuery({
+    queryKey: ['fetchVideosById'],
+    queryFn: () => fetchVideosById()
+  })
 
   const handleOpen = () => {
     setOpen(true)
     updateValue(true)
   }
 
-    // const handleOpen = (id: string, videoMeta: VideoType[string]['items'][0]) => {
-    //     setVideoId(id)
-    //     setVideoMeta(videoMeta)
-    //     setOpen(true)
-    //     refetchFactCheck()
-    // }
+  // const handleOpen = (id: string, videoMeta: VideoType[string]['items'][0]) => {
+  //     setVideoId(id)
+  //     setVideoMeta(videoMeta)
+  //     setOpen(true)
+  // }
 
   const handleClose = () => {
     setOpen(false)
@@ -90,8 +87,7 @@ const MainFeed = () => {
     author,
     date,
     stats,
-    huiMeta,
-    onClick
+    huiMeta
   }: {
     id: string
     videoThumbnail: string
@@ -99,25 +95,19 @@ const MainFeed = () => {
     title: string
     author: string
     date: string
-    stats: VideoType['youtubeStatistics']
+    stats: VideoType['statistics']
     huiMeta: VideoType['huiMeta']
-      // meta: VideoType[string]['items'][0]
-      // onClick: () => void
     onClick: () => void
   }) => {
     return (
       <div
         className="preview"
         style={{ cursor: 'pointer' }}
-
         onClick={() => {
           setVideoId(id)
           setVideoMeta(huiMeta)
           handleOpen()
         }}
-        // onClick={() => {
-        //     onClick()
-        // }}
       >
         <div className="thumbnail-row">
           <img className="thumbnail" src={videoThumbnail} alt="thumbnail" />
@@ -229,47 +219,44 @@ const MainFeed = () => {
     )
   }
 
-    // return (
-    //     <>
-    //         <Grid container spacing={3} className='px-4'>
-    //             {data && Object.entries(data).length > 0 ? (
-    //                 Object.entries(data).map(([videoId, videoData]) => {
-    //                     const item = videoData.items[0];
-    //                     return (
-    //                         <Grid item xs={12} sm={6} md={3} key={videoId} >
-    //                             <VideoBlock
-    //                                 id={videoId}
-    //                                 videoThumbnail={item.snippet.thumbnails.medium.url}
-    //                                 profileThumbnail={item.snippet.thumbnails.default.url}
-    //                                 title={item.snippet.title}
-    //                                 author={item.snippet.channelTitle}
-    //                                 viewCount={item.statistics.viewCount}
-    //                                 date={new Date(item.snippet.publishedAt).toLocaleDateString()}
-    //                                 meta={item}
-    //                                 onClick={() => {
-    //                                     handleOpen(videoId, item)
-    //                                 }}
-    //                             />
-    //                         </Grid>
-    //                     );
-    //                 })
+  // return (
+  //     <>
+  //         <Grid container spacing={3} className='px-4'>
+  //             {data && Object.entries(data).length > 0 ? (
+  //                 Object.entries(data).map(([videoId, videoData]) => {
+  //                     const item = videoData.items[0];
+  //                     return (
+  //                         <Grid item xs={12} sm={6} md={3} key={videoId} >
+  //                             <VideoBlock
+  //                                 id={videoId}
+  //                                 videoThumbnail={item.snippet.thumbnails.medium.url}
+  //                                 profileThumbnail={item.snippet.thumbnails.default.url}
+  //                                 title={item.snippet.title}
+  //                                 author={item.snippet.channelTitle}
+  //                                 viewCount={item.statistics.viewCount}
+  //                                 date={new Date(item.snippet.publishedAt).toLocaleDateString()}
+  //                                 meta={item}
+  //                                 onClick={() => {
+  //                                     handleOpen(videoId, item)
+  //                                 }}
+  //                             />
+  //                         </Grid>
+  //                     );
+  //                 })
 
-
-    if(!data.lenth) {
-        <Grid container spacing={3} className='px-4'>
-
-                <Grid item xs={12}>
-                    <p>No videos available.</p>
-                </Grid>
+  if (!isLoading && !data.length) {
+    return (
+      <Grid container spacing={3} className="px-4">
+        <Grid item xs={12}>
+          <p>No videos available.</p>
         </Grid>
-
-    }
-
+      </Grid>
+    )
+  }
 
   return (
     <>
       <Grid container spacing={2}>
-
         {data.map((item: VideoType, index: number) => {
           return (
             <Grid item xs={4}>
@@ -277,19 +264,21 @@ const MainFeed = () => {
                 <VideoBlock
                   key={item.id}
                   id={item.id}
-                  videoThumbnail={item.thumbnail}
-                  profileThumbnail={item.thumbnail}
-                  title={item.title}
-                  author={item.author}
-                  date={item.date}
+                  videoThumbnail={item.snippet.thumbnails.high.url}
+                  profileThumbnail={item.snippet.thumbnails.medium.url}
+                  title={item.snippet.title}
+                  author={item.snippet.channelTitle}
+                  date={item.snippet.publishedAt}
                   huiMeta={item.huiMeta} // this is probably too much props drilling
-                  stats={item.youtubeStatistics} // this is probably too much props drilling
+                  stats={item.statistics} // this is probably too much props drilling
+                  // @ts-ignore
+                  onClick={onclick}
                 />
+              </div>
             </Grid>
-      )
+          )
         })}
-
-    </Grid>
+      </Grid>
 
       <Modal
         open={open}
