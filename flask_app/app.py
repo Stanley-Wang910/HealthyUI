@@ -79,7 +79,7 @@ def youtube_transcript_most_replayed_cc(video_ids=None):
     res = go_interface.youtube_transcript_most_replayed_cc(video_ids)
     return jsonify(res)
 
-# ROUTE: Get relevant transcripts and most rewatched timestamps for a list of videos concurrently
+# ROUTE: Get relevant transcripts for a list of videos concurrently
 @app.route('/yt/rtr', methods=['GET'])
 def youtube_relevant_transcript_cc(video_ids=None):
     if video_ids is None:
