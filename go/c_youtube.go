@@ -402,9 +402,9 @@ func YoutubeGETtranscriptMostReplayedCC(_ids **C.char, idCount C.int) *C.char {
 		return C.CString(fmt.Sprintf("Error loading .env file: %v", err))
 	}
 
-	port := os.Getenv("BACKEND_PORT")
+	port := os.Getenv("PORT")
 	if port == "" {
-		return C.CString("Error: BACKEND_PORT is empty")
+		return C.CString("Error: PORT is empty")
 	}
 
 	var wg sync.WaitGroup
@@ -532,7 +532,7 @@ func YoutubeGETrelevantTranscriptCC(_ids **C.char, idCount C.int) *C.char {
 		return C.CString(fmt.Sprintf("Error loading .env file: %v", err))
 	}
 
-	port := os.Getenv("BACKEND_PORT")
+	port := os.Getenv("PORT")
 	if port == "" {
 		return C.CString("Error: BACKEND_PORT is empty")
 	}
