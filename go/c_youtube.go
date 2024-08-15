@@ -356,7 +356,8 @@ func youtubeGETtranscript(id string, port string) (TranscriptRes, error) {
 	var transcriptResponse TranscriptRes
 	// Subject to change with domain / port
 
-	reqUrl := fmt.Sprintf("http://localhost:%s", port)
+	// reqUrl := fmt.Sprintf("http://localhost:%s", port)
+	reqUrl := "https://backend.staging-5em2ouy-6eam53tw44i6e.ca-1.platformsh.site"
 
 	req, err := http.NewRequest("GET", reqUrl+"/yt/transcript", nil)
 
@@ -486,7 +487,8 @@ func YoutubeGETtranscriptMostReplayedCC(_ids **C.char, idCount C.int) *C.char {
 func youtubeGETrelevantTranscript(id string, port string) (RelevantTranscriptRes, error) {
 	var relevantTranscript RelevantTranscriptRes
 
-	reqUrl := fmt.Sprintf("http://localhost:%s", port)
+	// reqUrl := fmt.Sprintf("http://localhost:%s", port)
+	reqUrl := "https://backend.staging-5em2ouy-6eam53tw44i6e.ca-1.platformsh.site"
 
 	req, err := http.NewRequest("GET", reqUrl+"/yt/relevant-transcript", nil)
 
@@ -534,7 +536,7 @@ func YoutubeGETrelevantTranscriptCC(_ids **C.char, idCount C.int) *C.char {
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		return C.CString("Error: BACKEND_PORT is empty")
+		return C.CString("Error: PORT is empty")
 	}
 
 	var wg sync.WaitGroup
