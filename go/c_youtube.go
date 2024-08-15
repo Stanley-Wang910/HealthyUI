@@ -356,8 +356,7 @@ func youtubeGETtranscript(id string, port string) (TranscriptRes, error) {
 	var transcriptResponse TranscriptRes
 	// Subject to change with domain / port
 
-	// reqUrl := fmt.Sprintf("http://localhost:%s", port)
-	reqUrl := "https://backend.staging-5em2ouy-6eam53tw44i6e.ca-1.platformsh.site"
+	reqUrl := fmt.Sprintf("http://localhost:%s", port)
 
 	req, err := http.NewRequest("GET", reqUrl+"/yt/transcript", nil)
 
@@ -487,8 +486,7 @@ func YoutubeGETtranscriptMostReplayedCC(_ids **C.char, idCount C.int) *C.char {
 func youtubeGETrelevantTranscript(id string, port string) (RelevantTranscriptRes, error) {
 	var relevantTranscript RelevantTranscriptRes
 
-	// reqUrl := fmt.Sprintf("http://localhost:%s", port)
-	reqUrl := "https://backend.staging-5em2ouy-6eam53tw44i6e.ca-1.platformsh.site"
+	reqUrl := fmt.Sprintf("http://localhost:%s", port)
 
 	req, err := http.NewRequest("GET", reqUrl+"/yt/relevant-transcript", nil)
 
