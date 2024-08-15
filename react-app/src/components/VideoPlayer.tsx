@@ -9,10 +9,12 @@ import CardMeta from './widget/CardMeta'
 type Props = {
   id: string
   meta: VideoType[string]['items'][0] | null
-  factCheckData?: VideoFactCheck
-  isFactCheckLoading: boolean
+  // factCheckData?: VideoFactCheck
+  // isFactCheckLoading: boolean
 }
-const YoutubePlayerWrapper: React.FC<Props> = ({ id, meta, factCheckData, isFactCheckLoading }) => {
+const YoutubePlayerWrapper: React.FC<Props> = ({ id, meta,
+  //  factCheckData, isFactCheckLoading 
+  }) => {
 
   const [timeWatched, setTimeWatched] = useState(0)
   const intervalRef = useRef(null)
@@ -117,7 +119,9 @@ const YoutubePlayerWrapper: React.FC<Props> = ({ id, meta, factCheckData, isFact
           onPlaybackRateChange={onPlaybackRateChange}
           onPlaybackQualityChange={onPlaybackQualityChange}
         />
-        {ready && meta && <CardMeta meta={meta}  factCheckData={factCheckData} isFactCheckLoading={isFactCheckLoading} />}
+        {ready && meta && <CardMeta meta={meta}  
+        // factCheckData={factCheckData} isFactCheckLoading={isFactCheckLoading} 
+        />}
       </Box>
     </>
   )

@@ -29,38 +29,38 @@ const MainFeed = () => {
   const [videoId, setVideoId] = React.useState<string>('')
   const [meta, setVideoMeta] = React.useState<VideoType[string]['items'][0] | null>(null)
 
-  const { data: factCheckData, refetch: refetchFactCheck, isLoading: isFactCheckLoading, error: factCheckError } = useQuery({
-    queryKey: ['fetchNewsFactCheck', videoId],
-    queryFn: async () => {
-      console.log('Fetching fact check for videoId:', videoId);
-      if (!videoId || !meta) {
-        console.error('VideoId or meta is not set');
-        throw new Error('VideoId or meta is not set');
-      }
-      const result = await fetchNewsFactCheck([videoId], { [videoId]: { items: [meta] } });
-      console.log('Fact check result:', result);
-      return result;
-    },
-    enabled: false,
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+  // const { data: factCheckData, refetch: refetchFactCheck, isLoading: isFactCheckLoading, error: factCheckError } = useQuery({
+  //   queryKey: ['fetchNewsFactCheck', videoId],
+  //   queryFn: async () => {
+  //     console.log('Fetching fact check for videoId:', videoId);
+  //     if (!videoId || !meta) {
+  //       console.error('VideoId or meta is not set');
+  //       throw new Error('VideoId or meta is not set');
+  //     }
+  //     const result = await fetchNewsFactCheck([videoId], { [videoId]: { items: [meta] } });
+  //     console.log('Fact check result:', result);
+  //     return result;
+  //   },
+  //   enabled: false,
+  //   retry: 3,
+  //   retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  //   staleTime: 5 * 60 * 1000, // 5 minutes
   
-  });
+  // });
   const handleOpen = async (id: string, videoMeta: VideoType[string]['items'][0]) => {
     console.log('handleOpen', id, videoMeta)
     setVideoId(id)
     setVideoMeta(videoMeta)
     setOpen(true)
-    console.log('Invalidating and refetching fact check query');
-    await queryClient.invalidateQueries({ queryKey: ['fetchNewsFactCheck', id] });
+    // console.log('Invalidating and refetching fact check query');
+    // await queryClient.invalidateQueries({ queryKey: ['fetchNewsFactCheck', id] });
     
-    try {
-      const result = await refetchFactCheck();
-      console.log('Refetch result:', result);
-    } catch (error) {
-      console.error('Error during refetch:', error);
-    }
+    // try {
+    //   const result = await refetchFactCheck();
+    //   console.log('Refetch result:', result);
+    // } catch (error) {
+    //   console.error('Error during refetch:', error);
+    // }
   }
   const handleClose = () => {
     setOpen(false)
@@ -193,7 +193,9 @@ return (
           p: 3
         }}
       >
-        <YoutubePlayerWrapper id={videoId} meta={meta}  factCheckData={factCheckData?.[videoId]} isFactCheckLoading={isFactCheckLoading} />
+        <YoutubePlayerWrapper id={videoId} meta={meta}  
+        // factCheckData={factCheckData?.[videoId]} isFactCheckLoading={isFactCheckLoading} 
+        />
       </Modal>
     </>
   )

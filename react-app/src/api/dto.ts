@@ -55,7 +55,7 @@ export type VideoType = {
 }
 
 
-export type FackCheckResponse = {
+export type FactCheckResponse = {
   [videoId: string]: VideoFactCheck;
 }
 

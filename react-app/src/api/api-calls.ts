@@ -23,18 +23,14 @@ export const fetchUserVideos = async (videoIds: string | string[] = []) => {
   return data;
 };
 
-export const fetchNewsFactCheck = async (videoIds: string[], vidData: any) => {
-    const { data } = await axios.post(`${apiHost}/yt/fc`, {
-      video_ids: videoIds,
-      vid_data: vidData
-    }, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
-  if (!data.success) {
-    throw new Error(data.message)
-  }
-
+export const fetchNewsFactCheck = async (videoIds: string | string[] = []) => {
+  const ids = Array.isArray(videoIds) ? videoIds : [videoIds];
+  const encodedIds = encodeURIComponent(ids.join(','));
+  const url = `${apiHost}/yt/fc?ids=${encodedIds}`
+  console.log(url)
+  const { data } = await axios.get(
+    `${apiHost}/yt/fc?ids=${encodedIds}`
+  );
+  console.log(data)
   return data;
 };
