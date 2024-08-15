@@ -9,13 +9,13 @@ import yt_transcript
 import keyword_ex
 from services import video_service
 from utils import assert_video_ids
-import threading
+import threading 
 
 trk = keyword_ex.TextRankKeyword()
 
 app = Flask(__name__)
 
-# CORS(app, supports_credentials=True, origins=['*'])
+CORS(app, supports_credentials=True, origins=['*'])
 # ROUTE supports credentials option is bugging sometimes
 CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'

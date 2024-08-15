@@ -75,7 +75,7 @@ const MainFeed = () => {
 
   return (
     <>
-      <Grid container spacing={2}>
+      <Grid container spacing={2} className='px-4'>
         {data.map((item: VideoType, index: number) => {
           return (
             <Grid item xs={4}>
