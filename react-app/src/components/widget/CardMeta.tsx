@@ -51,7 +51,12 @@ const CardMeta = ({ id, meta }: { id: string; meta: VideoType['huiMeta'] }) => {
   }
 
   return (
-    <Card>
+    <Card
+      sx={{
+        maxHeight: '300px',
+        overflow: 'auto'
+      }}
+    >
       <CardHeader
         avatar={
           <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">

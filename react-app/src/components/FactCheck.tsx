@@ -122,7 +122,13 @@ const FactCheck: React.FC<FactCheckProps> = ({
               <Typography variant="caption" color="text.secondary">
                 Claimant: {claim.claimant} | Date:{' '}
                 {new Date(claim.claimDate).toLocaleDateString()} | Link:{' '}
-                {claim.claimReview[0].url}
+                <a
+                  target="_blank"
+                  href={claim.claimReview[0].url}
+                  rel="noreferrer"
+                >
+                  Read More
+                </a>
               </Typography>
               <br />
               {claim.claimReview.map((review, reviewIndex) => (
