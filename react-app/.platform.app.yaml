@@ -1,0 +1,28 @@
+name: frontend
+type: "nodejs:20"
+
+web:
+    commands:
+        start: sleep infinity
+
+    locations:
+        "/":
+            root: "build"
+            index:
+                - "index.html"
+            expires: 300s
+            scripts: true
+            allow: false
+            rules:
+                \.(css|js|gif|jpe?g|png|ttf|eot|woff2?|otf|html|ico|svg?)$:
+                    allow: true
+                ^/robots\.txt$:
+                    allow: true
+
+disk: 1024
+
+hooks:
+    build: |
+        set -e
+        npm install
+        npm run build

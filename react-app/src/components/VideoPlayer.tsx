@@ -2,20 +2,19 @@ import { Box, Skeleton } from '@mui/material'
 import YouTube, { YouTubeEvent } from 'react-youtube'
 import React, { useEffect, useRef, useState } from 'react'
 import { VideoType } from '../api/dto'
-import { VideoFactCheck } from '../api/dto'
 import CardMeta from './widget/CardMeta'
 
+// type VideoItem = VideoType[string]['items'][0]
+// type FactCheckData = any
 
-type Props = {
+const YoutubePlayerWrapper = ({
+  id,
+  meta
+  // factcheckData
+}: {
   id: string
-  meta: VideoType[string]['items'][0] | null
-  // factCheckData?: VideoFactCheck
-  // isFactCheckLoading: boolean
-}
-const YoutubePlayerWrapper: React.FC<Props> = ({ id, meta,
-  //  factCheckData, isFactCheckLoading 
-  }) => {
-
+  meta?: VideoType['huiMeta']
+}) => {
   const [timeWatched, setTimeWatched] = useState(0)
   const intervalRef = useRef(null)
   const playerRef = useRef(null)
@@ -61,7 +60,7 @@ const YoutubePlayerWrapper: React.FC<Props> = ({ id, meta,
         const currentTime = playerRef.current?.getCurrentTime()
         const deltaTime = currentTime - prevTimeRef.current
 
-        // quick fix for if user if skipping around on the video, 2 is arbitrary number
+        // quick fix for if user is skipping around on the video, 2 is arbitrary number
         // this mechanism could be cleaner
         prevTimeRef.current = currentTime
         if (deltaTime > 2) {
@@ -98,7 +97,12 @@ const YoutubePlayerWrapper: React.FC<Props> = ({ id, meta,
       )}
 
       <Box
-        sx={{ opacity: ready ? 1 : 0, position: ready ? 'auto' : 'absolute' }}
+        sx={{
+          maxWidth: '650px',
+          textAlign: 'center',
+          opacity: ready ? 1 : 0,
+          position: ready ? 'auto' : 'absolute'
+        }}
       >
         <YouTube
           videoId={id}
@@ -119,9 +123,7 @@ const YoutubePlayerWrapper: React.FC<Props> = ({ id, meta,
           onPlaybackRateChange={onPlaybackRateChange}
           onPlaybackQualityChange={onPlaybackQualityChange}
         />
-        {ready && meta && <CardMeta meta={meta}  
-        // factCheckData={factCheckData} isFactCheckLoading={isFactCheckLoading} 
-        />}
+        {ready && meta && <CardMeta id={id} meta={meta} />}
       </Box>
     </>
   )

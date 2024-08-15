@@ -13,6 +13,9 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import { Box, Chip, Grid, LinearProgress } from '@mui/material'
 import { VideoType } from '../../api/dto'
+import { useQuery } from '@tanstack/react-query'
+import { fetchNewsFactCheck } from '../../api/api-calls'
+import FactCheck from '../FactCheck'
 
 interface ExpandMoreProps extends IconButtonProps {
   expand: boolean
@@ -29,20 +32,31 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
   })
 }))
 
-type VideoItem = VideoType[string]['items'][0]
-
-const CardMeta = ({ meta }: { meta: VideoItem }) => {
+const CardMeta = ({ id, meta }: { id: string; meta: VideoType['huiMeta'] }) => {
   const [expanded, setExpanded] = React.useState(false)
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['fetchNewsFactCheck', id],
+    queryFn: async () => {
+      const result = fetchNewsFactCheck(id)
+      console.log('Fact check result:', result)
+      return result
+    },
+    enabled: !!id,
+    retry: 3
+  })
 
   const handleExpandClick = () => {
     setExpanded(!expanded)
   }
 
-  const spectrumCalc = 0.5; // Replace with actual value if available
-  const placeholder = "Placeholder text";
-
   return (
-    <Card>
+    <Card
+      sx={{
+        maxHeight: '300px',
+        overflow: 'auto'
+      }}
+    >
       <CardHeader
         avatar={
           <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
@@ -54,13 +68,13 @@ const CardMeta = ({ meta }: { meta: VideoItem }) => {
             <MoreVertIcon />
           </IconButton>
         }
-        title={meta.snippet.title}
+        title={'placeholer UI title'}
         subheader="This is a static subhead about our video meta"
       />
 
       <CardContent>
         <Typography variant="body2" color="text.secondary">
-          {placeholder}
+          {meta.placeholder}
         </Typography>
         <Box
           sx={{
@@ -74,13 +88,18 @@ const CardMeta = ({ meta }: { meta: VideoItem }) => {
             <Grid item xs={8}>
               <LinearProgress
                 variant="determinate"
-                value={spectrumCalc * 100}
+                // this should come from another call
+                value={meta.spectrum_calc * 100}
               />
             </Grid>
             <Grid item xs={2}>
               <Chip label="right wing" variant="outlined" />
             </Grid>
           </Grid>
+        </Box>
+
+        <Box>
+          <FactCheck factCheckData={data} isLoading={isLoading} error={error} />
         </Box>
       </CardContent>
 
@@ -96,7 +115,7 @@ const CardMeta = ({ meta }: { meta: VideoItem }) => {
       </CardActions>
       <Collapse in={expanded} timeout="auto" unmountOnExit>
         <CardContent>
-          <Typography paragraph> {meta.snippet.description} </Typography>
+          <Typography paragraph> {meta.description} </Typography>
         </CardContent>
       </Collapse>
     </Card>

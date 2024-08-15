@@ -8,10 +8,10 @@ import youtubeApps from '../icons/youtube-apps.svg'
 import notifications from '../icons/notifications.svg'
 import MainMenu from './MainMenu'
 import { useQuery } from '@tanstack/react-query'
-import { fetchUserVideos } from '../api/api-calls'
 import { Input } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import IconButton from '@mui/material/IconButton'
+import { fetchVideosById } from '../api/api-calls'
 
 const Header = () => {
   const [open, setOpen] = useState(false)
@@ -25,7 +25,7 @@ const Header = () => {
   // although useful, this is sort of a short circuit
   const { data, error, isLoading, refetch } = useQuery({
     queryKey: ['fetchUserVideos'],
-    queryFn: () => fetchUserVideos(input),
+    queryFn: () => fetchVideosById(input),
     enabled: !input
   })
 

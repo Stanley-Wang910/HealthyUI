@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import { ReactComponent as PaintIcon } from '../../icons/asdfasd-icon.svg'
+import React, { useState, useEffect, useContext } from 'react'
+import { ReactComponent as TreeOnFireIcon } from '../../icons/tree-fire.svg'
 import useLocalStorageObserver from '../../hooks/useLocalStorageObserver'
 import {
   Accordion,
@@ -7,7 +7,10 @@ import {
   AccordionSummary,
   Box
 } from '@mui/material'
-import Button from '@mui/material/Button' // Assuming you have an Icon component
+import Button from '@mui/material/Button'
+import Drawer from '@mui/material/Drawer'
+import VideoOpenContext from '../../context/context'
+import Typography from "@mui/material/Typography";
 
 // @todo once we have a more developed model, we will feed the total time watched into
 // some kind of algo to get back an 'icon count', using a tree right now, but that probably
@@ -28,6 +31,7 @@ const Co2CounterWidget = () => {
    * HOOKS
    *******************************************************/
   const [numberTrees, setNumberTrees] = useState(100) // This number will be updated somehow
+  const videoOpenContext = useContext(VideoOpenContext)
 
   const [value, setValue] = useLocalStorageObserver<string>(
     'totalTimeWatched',
@@ -47,6 +51,15 @@ const Co2CounterWidget = () => {
     return () => clearInterval(interval)
   }, [])
 
+  const [open, setOpen] = useState<boolean>(false)
+  const toggleDrawer = (newOpen: boolean) => {
+    setOpen(newOpen)
+  }
+
+  useEffect(() => {
+    toggleDrawer(!!videoOpenContext?.value)
+  }, [videoOpenContext?.value])
+
   /*******************************************************
    * RENDER
    *******************************************************/
@@ -55,11 +68,18 @@ const Co2CounterWidget = () => {
 
   return (
     <>
-      <Accordion>
-        <AccordionSummary id="panel-header" aria-controls="panel-content">
-          <Button variant="contained">Show Tree Counter</Button>
-        </AccordionSummary>
-        <AccordionDetails>
+      <Button
+        onClick={() => {
+          toggleDrawer(true)
+        }}
+        variant="contained"
+      >
+        Show Tree Counter
+      </Button>
+
+      <Drawer anchor={'top'} open={open} onClose={() => toggleDrawer(false)}>
+        <div>
+          <Typography>Co2 counter</Typography>
           {Array.from({ length: fullTrees }, (_, index) => (
             <Box
               key={index}
@@ -68,7 +88,7 @@ const Co2CounterWidget = () => {
                 display: 'inline-block'
               }}
             >
-              <PaintIcon />
+              <TreeOnFireIcon />
             </Box>
           ))}
           {partialTreeVisibility > 0 && (
@@ -80,11 +100,13 @@ const Co2CounterWidget = () => {
                 maskSize: 'cover'
               }}
             >
-              <PaintIcon />
+              <span>
+                <TreeOnFireIcon />
+              </span>
             </Box>
           )}
-        </AccordionDetails>
-      </Accordion>
+        </div>
+      </Drawer>
     </>
   )
 }

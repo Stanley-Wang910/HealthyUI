@@ -7,7 +7,7 @@ import go_interface
 import utils
 import yt_transcript  
 import keyword_ex
-from services import user_videos
+from services import video_service
 from utils import assert_video_ids
 import threading
 
@@ -16,19 +16,44 @@ trk = keyword_ex.TextRankKeyword()
 app = Flask(__name__)
 
 # CORS(app, supports_credentials=True, origins=['*'])
-# ROUTEsupports credentials option is bugging sometimes
+# ROUTE supports credentials option is bugging sometimes
 CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
-@app.route('/api/video/get-playlist/<keyword>')
-@app.route('/api/video/get-playlist/', defaults={'keyword': None})
-def get_user_videos_playlist(keyword: str):
+#get video by id
 
-    if keyword:
-        print(f"Keyword provided: {keyword}")
-    else:
-        print("No keyword provided")
-    return jsonify(user_videos.get_user_videos_playlist_service(keyword))
+# i.e if first time user opened the portal
+@app.route('/api/video', methods=['GET'])
+def get_videos_by_id():
+    video_ids = request.args.get('ids')
+
+    if video_ids is None:
+        return jsonify(video_service.get_default_video_list())
+
+    video_ids, err, code = utils.assert_video_ids(video_ids)
+    if err:
+        return err, code
+
+    return jsonify(video_service.get_video_by_ids(video_ids))
+
+# @todo, keyword 'search' is not implemented
+# for now send back random string of IDs
+@app.route('/api/video/<keyword>')
+def get_user_videos_playlist(keyword: str):
+    print('being called')
+    return jsonify(video_service.get_video_by_keyword_search(keyword))
+
+
+# when user loads individual video,
+# or we decide in the future that we need more complex lists
+# use this route
+# @app.route('/api/video/get-full-video-by-id', methods=['GET'])
+# def get_full_user_video():
+#     video_ids = request.args.get('ids')
+#     video_ids, err, code = utils.assert_video_ids(video_ids)
+#     if err:
+#         return err, code
+#     return jsonify(user_videos.get_user_full_video_service(video_ids))
 
 
 # ROUTE: Go calls this concurrently to return transcripts for a list of videos
@@ -333,11 +358,7 @@ def news_api_cc(queries=None):
     return jsonify(res)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
-
-
-
-
-    
-
-
+    # note port is a reserved env variable in platform SH
+    # @todo consolidate PORT + BACKEND_PORT
+    port = int(os.getenv('PORT', 5000))
+    app.run(debug=True, port=port)
