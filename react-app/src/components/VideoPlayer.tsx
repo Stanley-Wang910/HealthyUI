@@ -4,12 +4,16 @@ import React, { useEffect, useRef, useState } from 'react'
 import { VideoType } from '../api/dto'
 import CardMeta from './widget/CardMeta'
 
+// type VideoItem = VideoType[string]['items'][0]
+// type FactCheckData = any
+
 const YoutubePlayerWrapper = ({
   id,
   meta
+  // factcheckData
 }: {
   id: string
-  meta?: VideoType['meta']
+  meta?: VideoType['huiMeta']
 }) => {
   const [timeWatched, setTimeWatched] = useState(0)
   const intervalRef = useRef(null)
@@ -56,7 +60,7 @@ const YoutubePlayerWrapper = ({
         const currentTime = playerRef.current?.getCurrentTime()
         const deltaTime = currentTime - prevTimeRef.current
 
-        // quick fix for if user if skipping around on the video, 2 is arbitrary number
+        // quick fix for if user is skipping around on the video, 2 is arbitrary number
         // this mechanism could be cleaner
         prevTimeRef.current = currentTime
         if (deltaTime > 2) {
@@ -93,14 +97,19 @@ const YoutubePlayerWrapper = ({
       )}
 
       <Box
-        sx={{ opacity: ready ? 1 : 0, position: ready ? 'auto' : 'absolute' }}
+        sx={{
+          maxWidth: '650px',
+          textAlign: 'center',
+          opacity: ready ? 1 : 0,
+          position: ready ? 'auto' : 'absolute'
+        }}
       >
         <YouTube
           videoId={id}
           id={id}
           className={'youtube-wrapper'}
           iframeClassName={'youtube-iframe-wrapper'}
-          title={'nto sure if we need this yet'}
+          title={'not sure if we need this yet'}
           opts={{
             enablejsapi: 1,
             rel: 0
@@ -114,7 +123,7 @@ const YoutubePlayerWrapper = ({
           onPlaybackRateChange={onPlaybackRateChange}
           onPlaybackQualityChange={onPlaybackQualityChange}
         />
-        {ready && meta && <CardMeta meta={meta} />}
+        {ready && meta && <CardMeta id={id} meta={meta} />}
       </Box>
     </>
   )

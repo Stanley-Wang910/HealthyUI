@@ -1,1 +1,1 @@
-from .user_videos import *
+from .video_service import *

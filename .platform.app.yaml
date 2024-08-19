@@ -1,0 +1,31 @@
+name: flask
+type: "python:3.10"
+
+#relationships:
+#    database: "db:mysql"
+#    rediscache: "cache:redis"
+
+disk: 1024
+
+web:
+    commands:
+        start: python flask_app/app.py # run -p $PORT
+
+hooks:
+    build: |
+        set -e
+        # Install Go in the /tmp directory
+        wget https://dl.google.com/go/go1.22.6.linux-amd64.tar.gz -O /tmp/go1.22.6.linux-amd64.tar.gz
+        tar -xvf /tmp/go1.22.6.linux-amd64.tar.gz -C /tmp
+        export PATH=$PATH:/tmp/go/bin
+        export GOROOT=/tmp/go
+
+        # Verify Go installation
+        go version
+        
+        # Python setup
+        pip install --upgrade pip==23.0   
+        pip install -r requirements.txt
+        
+        # Run shell script (bypass chmod +x)
+        bash ./build_cgo_lib.sh

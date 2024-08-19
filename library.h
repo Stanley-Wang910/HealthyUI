@@ -35,7 +35,7 @@ typedef struct { const char *p; ptrdiff_t n; } _GoString_;
 
 #line 1 "cgo-generated-wrapper"
 
-#line 12 "c_youtube.go"
+#line 15 "c_youtube.go"
  #include <stdbool.h>
  #include <stdint.h>
  #include <stdio.h>

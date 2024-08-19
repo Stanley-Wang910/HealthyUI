@@ -13,6 +13,9 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import { Box, Chip, Grid, LinearProgress } from '@mui/material'
 import { VideoType } from '../../api/dto'
+import { useQuery } from '@tanstack/react-query'
+import { fetchNewsFactCheck } from '../../api/api-calls'
+import FactCheck from '../FactCheck'
 
 interface ExpandMoreProps extends IconButtonProps {
   expand: boolean
@@ -29,15 +32,31 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
   })
 }))
 
-const CardMeta = ({ meta }: { meta: VideoType['meta'] }) => {
+const CardMeta = ({ id, meta }: { id: string; meta: VideoType['huiMeta'] }) => {
   const [expanded, setExpanded] = React.useState(false)
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['fetchNewsFactCheck', id],
+    queryFn: async () => {
+      const result = fetchNewsFactCheck(id)
+      console.log('Fact check result:', result)
+      return result
+    },
+    enabled: !!id,
+    retry: 3
+  })
 
   const handleExpandClick = () => {
     setExpanded(!expanded)
   }
 
   return (
-    <Card>
+    <Card
+      sx={{
+        maxHeight: '300px',
+        overflow: 'auto'
+      }}
+    >
       <CardHeader
         avatar={
           <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
@@ -49,7 +68,7 @@ const CardMeta = ({ meta }: { meta: VideoType['meta'] }) => {
             <MoreVertIcon />
           </IconButton>
         }
-        title={meta.title}
+        title={'placeholer UI title'}
         subheader="This is a static subhead about our video meta"
       />
 
@@ -69,6 +88,7 @@ const CardMeta = ({ meta }: { meta: VideoType['meta'] }) => {
             <Grid item xs={8}>
               <LinearProgress
                 variant="determinate"
+                // this should come from another call
                 value={meta.spectrum_calc * 100}
               />
             </Grid>
@@ -76,6 +96,10 @@ const CardMeta = ({ meta }: { meta: VideoType['meta'] }) => {
               <Chip label="right wing" variant="outlined" />
             </Grid>
           </Grid>
+        </Box>
+
+        <Box>
+          <FactCheck factCheckData={data} isLoading={isLoading} error={error} />
         </Box>
       </CardContent>
 

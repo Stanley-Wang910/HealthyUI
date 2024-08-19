@@ -1,31 +1,42 @@
-import React from 'react'
+import React, { useContext, useState } from 'react'
 import '../styles/MainFeed.css'
 
-import { fetchUserVideos } from '../api/api-calls'
 import { VideoType } from '../api/dto'
 import { useQuery } from '@tanstack/react-query'
 import YoutubePlayerWrapper from './VideoPlayer'
 import { Grid, Modal, Skeleton } from '@mui/material'
+import VideoOpenContext from '../context/context'
+import { fetchNewsFactCheck, fetchVideosById } from '../api/api-calls'
+import VideoBlock from './VideoBlock'
 
 const MainFeed = () => {
+  const [open, setOpen] = useState<boolean>(false)
+  const [videoId, setVideoId] = useState<string>('')
+  const [meta, setVideoMeta] = useState<VideoType['huiMeta']>()
+  const { value, updateValue } = useContext(VideoOpenContext)
+
   const { data, error, isError, isLoading } = useQuery({
-    queryKey: ['fetchUserVideos'],
-    queryFn: () => fetchUserVideos('')
+    queryKey: ['fetchVideosById'],
+    queryFn: () => fetchVideosById()
   })
-  const [open, setOpen] = React.useState<boolean>(false)
-  const [videoId, setVideoId] = React.useState<string>('')
-  const [meta, setVideoMeta] = React.useState<VideoType['meta']>()
+
+  const handleClick = (id: string, huiMeta: VideoType['huiMeta']) => {
+    setVideoId(id)
+    setVideoMeta(huiMeta)
+    handleOpen()
+  }
 
   const handleOpen = () => {
     setOpen(true)
+    updateValue(true)
   }
+
   const handleClose = () => {
     setOpen(false)
+    updateValue(false)
   }
 
   if (isLoading) {
-    // don't block rendering for now but use this pattern in sub components to show
-    // render blocking API requests
     return (
       <Grid container spacing={2}>
         {Array.from({ length: 6 }, (_, index) => (
@@ -52,60 +63,19 @@ const MainFeed = () => {
     return <div>error</div>
   }
 
-  const VideoBlock = ({
-    id,
-    videoThumbnail,
-    profileThumbnail,
-    title,
-    author,
-    viewCount,
-    date,
-    meta
-  }: {
-    id: string
-    videoThumbnail: string
-    profileThumbnail: string
-    title: string
-    author: string
-    viewCount: string
-    date: string
-    meta: VideoType['meta']
-  }) => {
+  if (!isLoading && !data.length) {
     return (
-      <div
-        className="preview"
-        onClick={() => {
-          setVideoId(id)
-          setVideoMeta(meta)
-          setOpen(true)
-        }}
-      >
-        <div className="thumbnail-row">
-          <img className="thumbnail" src={videoThumbnail} alt="thumbnail" />
-        </div>
-
-        <div className="video-info-grid">
-          <div className="channel-pic">
-            <img className="profile-pic" src={profileThumbnail} alt="channel" />
-          </div>
-
-          <div className="video-info">
-            <p className="title">{title}</p>
-
-            <p className="author">{author}</p>
-
-            <p className="stats">
-              {viewCount} &middot; {date}
-            </p>
-          </div>
-        </div>
-      </div>
+      <Grid container spacing={3} className="px-4">
+        <Grid item xs={12}>
+          <p>No videos available.</p>
+        </Grid>
+      </Grid>
     )
   }
 
   return (
     <>
-      <Grid container spacing={2}>
+      <Grid container spacing={2} className='px-4'>
         {data.map((item: VideoType, index: number) => {
           return (
             <Grid item xs={4}>
@@ -113,13 +83,14 @@ const MainFeed = () => {
                 <VideoBlock
                   key={item.id}
                   id={item.id}
-                  videoThumbnail={item.thumbnail}
-                  profileThumbnail={item.thumbnail}
-                  title={item.title}
-                  author={item.author}
-                  viewCount={item.views}
-                  date={item.date}
-                  meta={item.meta}
+                  videoThumbnail={item.snippet.thumbnails.high.url}
+                  profileThumbnail={item.snippet.thumbnails.medium.url}
+                  title={item.snippet.title}
+                  author={item.snippet.channelTitle}
+                  date={new Date(item.snippet.publishedAt).toLocaleDateString()}
+                  huiMeta={item.huiMeta}
+                  stats={item.statistics}
+                  onClick={handleClick}
                 />
               </div>
             </Grid>

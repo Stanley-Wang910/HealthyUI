@@ -158,14 +158,13 @@ def get_relevant_transcript(video_ids, tolerance_sec=20, option="asc"):
     # Splice link, Convert to bytes for C functions
 
     res = go_interface.youtube_transcript_most_replayed_cc(video_ids)
-
-    print(res)
    
 
     transcript_list = {}
     for byte_id in video_ids: 
         video_id = byte_id.decode('utf-8')
 
+        print(res)
         # Handle case where transcript is empty
         if res[video_id]["Transcript"]["transcript"] == None:
             transcript_list[video_id] = {
@@ -175,13 +174,14 @@ def get_relevant_transcript(video_ids, tolerance_sec=20, option="asc"):
             continue
 
         timestamps = None
-        if res[video_id]["MostReplayed"]["items"][0]["mostReplayed"]["markers"] is not None:
-            try:
-                timestamps = get_peak_rewatched_timestamps(res, video_id)
-                print(timestamps)
-            except Exception as e:
-                print("No peak rewatched timestamps found")
-                timestamps = None
+        if res[video_id]["MostReplayed"]["items"] is not None:
+            if res[video_id]["MostReplayed"]["items"][0]["mostReplayed"]["markers"] is not None:
+                try:
+                    timestamps = get_peak_rewatched_timestamps(res, video_id)
+                    print(timestamps)
+                except Exception as e:
+                    print("No peak rewatched timestamps found")
+                    timestamps = None
 
         if timestamps is not None:
             entries = find_close_entries(timestamps, res[video_id]["Transcript"]["transcript"], tolerance_sec=tolerance_sec) # Default returns ascending
