@@ -63,7 +63,7 @@ def simplify_youtube_data(data):
 
 # if no ids defined
 def get_default_video_list():
-    temp_ids = [b'bNH16A4f5Yk', b'Cx3tIR7C-pM', b'M1u1ECx_Nlw', b'H0ea6OiKdOc', b'Cl3izXcp86w', b'0w3NtkYRtDM']
+    temp_ids = [b'bNH16A4f5Yk', b'Cx3tIR7C-pM', b'M1u1ECx_Nlw', b'H0ea6OiKdOc', b'Cl3izXcp86w', b'q4ph9B9OMbk']
     res = youtube_cc(temp_ids)
     formatted_data = simplify_youtube_data(res)
     return formatted_data
