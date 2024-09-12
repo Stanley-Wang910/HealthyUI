@@ -61,6 +61,6 @@ export const fetchNewsFactCheck = async (videoIds: string | string[] = []) => {
   } catch (error) {
     console.log('Error fetching data, using static data')
     // Handle error by returning static data based on firstId
-    return results[firstId] ? results[firstId] : { error: 'No data available' }
+    return cachedResult(firstId)
   }
 }
