@@ -68,8 +68,8 @@ const CardMeta = ({ id, meta }: { id: string; meta: VideoType['huiMeta'] }) => {
             <MoreVertIcon />
           </IconButton>
         }
-        title={'placeholer UI title'}
-        subheader="This is a static subhead about our video meta"
+        title={'More information about your video'}
+        subheader="Below you will find information about this video such as fact checking, helpful links, and a poltical spectrum analysis"
       />
 
       <CardContent>

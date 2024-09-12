@@ -4,13 +4,24 @@ from faker import Factory
 
 import yt_transcript
 
-
 fake = Factory.create()
 
 from dummy_data import video_list
 from go_interface import youtube_cc
 
-youtube_ids = [b'ARPzNBahjEg', b'aAbjtW7ZtmU', b'_ZTZGz1xusA', b'Nkq_mI2PlM8', b'Cl3izXcp86w', b'0w3NtkYRtDM']
+youtube_ids = [
+    b'74kHGCBHvDc',
+    b'8RVooYlyl20',
+    b'Cx3tIR7C-pM',
+    b'ImSlcxvDz4Q',
+    b'M1u1ECx_Nlw',
+    b'UE6QxBaIEv8',
+    b'bNH16A4f5Yk',
+    b'kZ-kK6mJRKM',
+    b'X2tzjK_-mko',
+    b'k357uIJzcr0',
+
+]
 
 
 # @todo these are out of date now as we made resp closer to youtube API
@@ -19,6 +30,7 @@ class VideoMeta(TypedDict):
     placeholder: str
     title: str
     description: str
+
 
 # @todo these are out of date now as we made resp closer to youtube API
 class VideoInfo(TypedDict):
@@ -43,7 +55,7 @@ def simplify_youtube_data(data):
             video_data = {
                 'id': item['id'],
                 'statistics': item['statistics'],
-                'snippet' : item['snippet'],
+                'snippet': item['snippet'],
                 'topicDetails': item['topicDetails'],
                 # keep this for now, they are just for demo purposes
                 # but most likely tehy will be resplaces by independent API
@@ -52,7 +64,7 @@ def simplify_youtube_data(data):
                 # doesn't necessarily match the one coming back from youtube
                 'huiMeta': {
                     'title': fake.text(max_nb_chars=20),
-                    'spectrum_calc':  fake.random_int(min=0, max=10) / 10,
+                    'spectrum_calc': fake.random_int(min=0, max=10) / 10,
                     'placeholder': fake.text(max_nb_chars=100),
                     'description': fake.text(max_nb_chars=250)
                 }
@@ -61,20 +73,21 @@ def simplify_youtube_data(data):
 
     return simplified_videos
 
+
 # if no ids defined
 def get_default_video_list():
-    temp_ids = [b'bNH16A4f5Yk', b'Cx3tIR7C-pM', b'M1u1ECx_Nlw', b'H0ea6OiKdOc', b'Cl3izXcp86w', b'0w3NtkYRtDM']
+    temp_ids = youtube_ids
     res = youtube_cc(temp_ids)
     formatted_data = simplify_youtube_data(res)
     return formatted_data
+
 
 # placeholder / stubb
 def get_video_by_keyword_search(keyword: str):
-    temp_ids = [b'bNH16A4f5Yk', b'Cx3tIR7C-pM', b'M1u1ECx_Nlw', b'H0ea6OiKdOc', b'Cl3izXcp86w', b'0w3NtkYRtDM']
+    temp_ids = youtube_ids
     res = youtube_cc(temp_ids)
     formatted_data = simplify_youtube_data(res)
     return formatted_data
-
 
 
 def get_video_by_ids(video_ids: str):
