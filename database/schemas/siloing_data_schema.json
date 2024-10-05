@@ -1,0 +1,19 @@
+{
+  "bsonType": "object",
+  "required": [
+    "token_id",
+    "platform",
+    "time"
+  ],
+  "properties": {
+    "token_id": {
+      "bsonType": "string"
+    },
+    "platform": {
+      "bsonType": "string"
+    },
+    "time": {
+      "bsonType": "int"
+    }
+  }
+}
