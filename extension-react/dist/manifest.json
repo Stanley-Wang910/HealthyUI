@@ -1,0 +1,16 @@
+{
+    "version": "1.0.0",
+    "manifest_version": 3,
+    "manifest_version": 3,
+    "name": "Healthy UI v2",
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["js/index.js"]
+        }
+    ],
+    "action": {
+        "default_popup": "js/index.html",
+        "default_title": "Bubbler React Chrome Extension"
+    }
+}

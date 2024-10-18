@@ -33,3 +33,24 @@
 `pip install -r requirements.txt`
 
 #### via docker 
+
+### EXTENSION
+
+the extension needs to be loaded into chrome: 
+
+extension workflow: 
+`$ cd extension-react`  
+`$ npm install`   
+`$ npm run build`   
+`$ npm watch`   
+
+open chrome browser  
+navigate to [chrome extensions page](chrome://extensions/)
+
+select 'developer mode on' 
+select 'load unpacked'
+navigate to the extension-react folder 
+choose the 'dist' directory 
+
+
+

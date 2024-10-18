@@ -19,12 +19,15 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-react": "^7.35.0",
+    "nodemon": "^3.1.7",
     "prettier": "^3.3.3",
+    "react-app-rewired": "^2.2.1",
     "react-router-dom": "^6.26.0",
     "react-scripts": "5.0.1",
     "react-youtube": "^10.1.0",
     "typescript": "^5.5.4",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "ws": "^8.18.0"
   },
   "overrides": {
     "typescript": "^5.5.4"
@@ -36,8 +39,18 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "build-extension": "BUILD_PATH=../extension/react-build INLINE_RUNTIME_CHUNK=false react-app-rewired build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "watch": "nodemon --watch src --exec 'node build-script.js && node server.js",
+    "watch-ex": "nodemon --watch"
+  },
+  "nodemonConfig": {
+    "watch": [
+      "src/"
+    ],
+    "ext": "js,jsx,ts,tsx,css,html",
+    "exec": "npm run build-extension"
   },
   "browserslist": {
     "production": [
@@ -54,6 +67,7 @@
   "devDependencies": {
     "autoprefixer": "^10.4.19",
     "postcss": "^8.4.40",
-    "tailwindcss": "^3.4.9"
+    "tailwindcss": "^3.4.9",
+    "terser-webpack-plugin": "^5.3.10"
   }
 }

@@ -1,0 +1,12 @@
+/* popup.css */
+body {
+    font-family: Arial, sans-serif;
+    margin: 8px;
+    color: #333;
+    height: 400px;
+    width: 500px;
+}
+
+h1 {
+    color: #0056b3;
+}

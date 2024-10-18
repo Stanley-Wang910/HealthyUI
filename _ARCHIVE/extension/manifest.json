@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Healthy UI",
+  "version": "1.0",
+  "action": {
+    "default_popup": "react-build/index.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+  "permissions": [
+    "activeTab"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["react-build/static/js/*.js", "react-build/static/css/*.css"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

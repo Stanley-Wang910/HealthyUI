@@ -51,18 +51,28 @@ const router = createBrowserRouter([
   }
 ])
 
+const popup = () => {
+  return (
+    <div>
+      <div>this is the new popop but in react add</div>
+    </div>
+  )
+}
+
+console.log('we are in the popup')
 root.render(
   <React.StrictMode>
-    <StyledEngineProvider injectFirst>
-      <CacheProvider value={cache}>
-        <ThemeProvider theme={theme}>
-          <QueryClientProvider client={queryClient}>
-            <CssBaseline />
-            <RouterProvider router={router} />
-          </QueryClientProvider>
-        </ThemeProvider>
-      </CacheProvider>
-    </StyledEngineProvider>
+    {/*<StyledEngineProvider injectFirst>*/}
+    <CacheProvider value={cache}>
+      <ThemeProvider theme={theme}>
+        <QueryClientProvider client={queryClient}>
+          <CssBaseline />
+          {/*<RouterProvider router={router} />*/}
+          <App />
+        </QueryClientProvider>
+      </ThemeProvider>
+    </CacheProvider>
+    {/*</StyledEngineProvider>*/}
   </React.StrictMode>
 )
 
